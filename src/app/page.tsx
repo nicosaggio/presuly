@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { getSession } from "@/lib/auth/session";
 import { LocaleSwitcher } from "@/components/locale-switcher";
@@ -40,6 +41,18 @@ export default async function Home() {
         </div>
         <p className="mt-4 text-sm text-muted-foreground">{dict.landing.freeNote}</p>
       </main>
+
+      <footer className="flex items-center justify-center gap-4 px-6 py-6 text-xs text-muted-foreground border-t">
+        <Link href="/terms" className="hover:text-foreground">
+          {dict.common.terms}
+        </Link>
+        <Link href="/privacy" className="hover:text-foreground">
+          {dict.common.privacy}
+        </Link>
+        <Link href="/refunds" className="hover:text-foreground">
+          {dict.common.refunds}
+        </Link>
+      </footer>
     </div>
   );
 }
