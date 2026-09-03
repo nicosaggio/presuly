@@ -49,7 +49,10 @@ export const budgets = pgTable("budgets", {
   scope: text("scope"),
   items: jsonb("items").notNull().$type<BudgetItem[]>().default([]),
   conditions: text("conditions"),
-  currency: text("currency").notNull().default("USD"),
+  currency: text("currency").notNull().default("ARS"),
+  /** Link de pago externo (Mercado Pago, Stripe, PayPal...) que pega el propio
+   * emisor. Presuly nunca cobra ni gira esta plata — es responsabilidad del emisor. */
+  paymentLink: text("payment_link"),
   validityDays: integer("validity_days").notNull().default(15),
   publishedAt: timestamp("published_at", { withTimezone: true }),
   validUntil: timestamp("valid_until", { withTimezone: true }),

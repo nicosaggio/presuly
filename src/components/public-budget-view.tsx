@@ -141,14 +141,25 @@ export function PublicBudgetView({
                 {dict.publicView.signerName}: {acceptance.signerName}
               </p>
             )}
-            <Button
-              render={<a href={`/api/p/${budget.token}/pdf`} target="_blank" rel="noreferrer" />}
-              nativeButton={false}
-              variant="outline"
-              size="sm"
-            >
-              {dict.publicView.downloadPdf}
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {budget.paymentLink && (
+                <Button
+                  render={<a href={budget.paymentLink} target="_blank" rel="noreferrer" />}
+                  nativeButton={false}
+                  size="sm"
+                >
+                  {dict.publicView.pay}
+                </Button>
+              )}
+              <Button
+                render={<a href={`/api/p/${budget.token}/pdf`} target="_blank" rel="noreferrer" />}
+                nativeButton={false}
+                variant="outline"
+                size="sm"
+              >
+                {dict.publicView.downloadPdf}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}

@@ -10,6 +10,7 @@ export const en: Dictionary = {
     remove: "Remove",
     optional: "Optional",
     copyLink: "Copy link",
+    shareWhatsapp: "Send via WhatsApp",
     linkCopied: "Link copied",
     logout: "Log out",
   },
@@ -66,6 +67,11 @@ export const en: Dictionary = {
     addItem: "Add item",
     fieldConditions: "Conditions",
     fieldConditionsPlaceholder: "Payment terms, timelines, what's out of scope…",
+    fieldPaymentLink: "Payment link (optional)",
+    fieldPaymentLinkHintArs:
+      "Paste your Mercado Pago payment link. The client pays you directly — Presuly never touches this money.",
+    fieldPaymentLinkHintOther:
+      "Paste your payment link (Stripe, PayPal, etc). The client pays you directly — Presuly never touches this money.",
     fieldCurrency: "Currency",
     fieldValidityDays: "Valid for (days)",
     total: "Total",
@@ -93,6 +99,7 @@ export const en: Dictionary = {
     acceptedTitle: "Proposal accepted!",
     acceptedBody: "We sent a PDF copy to your email.",
     downloadPdf: "Download PDF",
+    pay: "Pay",
     poweredBy: "Made with Presuly — create your free proposal",
     signatureNote:
       "This is a timestamped acceptance record, not a certified digital signature.",

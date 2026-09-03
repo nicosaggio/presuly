@@ -8,6 +8,20 @@
       "when": 1788461407975,
       "tag": "0000_nosy_puppet_master",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788463069128,
+      "tag": "0001_ancient_liz_osborn",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788463501220,
+      "tag": "0002_romantic_polaris",
+      "breakpoints": true
     }
   ]
 }

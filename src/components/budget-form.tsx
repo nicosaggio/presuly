@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
-const CURRENCIES = ["USD", "ARS", "MXN", "EUR", "COP", "CLP"];
+const CURRENCIES = ["ARS", "USD", "MXN", "EUR", "COP", "CLP"];
 
 function emptyItem(): BudgetItem {
   return { id: nanoid(8), description: "", price: 0, optional: false, selected: true };
@@ -37,7 +37,7 @@ export function BudgetForm({
   const [items, setItems] = useState<BudgetItem[]>(
     budget?.items?.length ? budget.items : [emptyItem()]
   );
-  const [currency, setCurrency] = useState(budget?.currency ?? "USD");
+  const [currency, setCurrency] = useState(budget?.currency ?? "ARS");
   const [isPending, startTransition] = useTransition();
 
   function updateItem(id: string, patch: Partial<BudgetItem>) {
@@ -168,6 +168,26 @@ export function BudgetForm({
           placeholder={dict.editor.fieldConditionsPlaceholder}
           rows={3}
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="paymentLink">{dict.editor.fieldPaymentLink}</Label>
+        <Input
+          id="paymentLink"
+          name="paymentLink"
+          type="url"
+          defaultValue={budget?.paymentLink ?? ""}
+          placeholder={
+            currency === "ARS"
+              ? "https://mpago.la/tu-link"
+              : "https://buy.stripe.com/... o https://paypal.me/..."
+          }
+        />
+        <p className="text-xs text-muted-foreground">
+          {currency === "ARS"
+            ? dict.editor.fieldPaymentLinkHintArs
+            : dict.editor.fieldPaymentLinkHintOther}
+        </p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">

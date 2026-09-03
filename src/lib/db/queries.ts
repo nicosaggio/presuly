@@ -38,12 +38,20 @@ export async function getUserById(id: string) {
   return user ?? null;
 }
 
+/**
+ * Upsert atómico: dos verificaciones de magic link casi simultáneas (común porque
+ * Gmail/Outlook "pre-visitan" los links por seguridad) no deben pisarse en una
+ * carrera select-then-insert. ON CONFLICT DO UPDATE con un no-op garantiza que
+ * RETURNING siempre traiga la fila, gane quien gane la carrera.
+ */
 export async function upsertUserByEmail(email: string, locale: string) {
-  const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  if (existing[0]) return existing[0];
-  const [created] = await db
+  const [user] = await db
     .insert(users)
     .values({ email, locale })
+    .onConflictDoUpdate({
+      target: users.email,
+      set: { email },
+    })
     .returning();
-  return created;
+  return user;
 }

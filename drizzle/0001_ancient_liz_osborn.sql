@@ -1,0 +1,1 @@
+ALTER TABLE "budgets" ALTER COLUMN "currency" SET DEFAULT 'ARS';

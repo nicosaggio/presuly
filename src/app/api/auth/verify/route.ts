@@ -17,9 +17,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=invalid_link`);
   }
 
-  const user = await upsertUserByEmail(payload.email, payload.locale);
-  await createSession({ userId: user.id, email: user.email });
-  await setLocale(payload.locale);
+  try {
+    const user = await upsertUserByEmail(payload.email, payload.locale);
+    await createSession({ userId: user.id, email: user.email });
+    await setLocale(payload.locale);
+  } catch (err) {
+    console.error("magic link verification failed", err);
+    return NextResponse.redirect(`${origin}/login?error=invalid_link`);
+  }
 
   return NextResponse.redirect(`${origin}/dashboard`);
 }

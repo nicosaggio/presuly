@@ -30,6 +30,12 @@ export function BudgetPublishPanel({
     });
   }
 
+  const whatsappText =
+    locale === "en"
+      ? `Here's your proposal "${budget.title}": ${publicUrl}`
+      : `Te paso tu presupuesto "${budget.title}": ${publicUrl}`;
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
+
   return (
     <Card>
       <CardContent className="space-y-3 py-4">
@@ -57,6 +63,15 @@ export function BudgetPublishPanel({
                 {dict.common.copyLink}
               </Button>
             </div>
+            <Button
+              render={<a href={whatsappUrl} target="_blank" rel="noreferrer" />}
+              nativeButton={false}
+              size="sm"
+              variant="outline"
+              className="w-full"
+            >
+              {dict.common.shareWhatsapp}
+            </Button>
             <ul className="text-sm text-muted-foreground space-y-0.5">
               {budget.viewedAt && (
                 <li>

@@ -37,6 +37,10 @@ const budgetFormSchema = z.object({
   scope: z.string().trim().optional(),
   conditions: z.string().trim().optional(),
   currency: z.string().trim().min(1),
+  paymentLink: z
+    .union([z.literal(""), z.string().trim().url()])
+    .optional()
+    .transform((v) => (v ? v : undefined)),
   validityDays: z.coerce.number().int().min(1).max(180),
   items: z.array(itemSchema),
 });
@@ -60,6 +64,7 @@ function parseBudgetForm(formData: FormData) {
     scope: formData.get("scope") ?? "",
     conditions: formData.get("conditions") ?? "",
     currency: formData.get("currency"),
+    paymentLink: formData.get("paymentLink") ?? "",
     validityDays: formData.get("validityDays"),
     items,
   });
@@ -102,6 +107,7 @@ export async function createBudget(formData: FormData) {
       scope: data.scope,
       conditions: data.conditions,
       currency: data.currency,
+      paymentLink: data.paymentLink,
       validityDays: data.validityDays,
       items: data.items as BudgetItem[],
     })
@@ -124,6 +130,7 @@ export async function updateBudget(id: string, formData: FormData) {
       scope: data.scope,
       conditions: data.conditions,
       currency: data.currency,
+      paymentLink: data.paymentLink,
       validityDays: data.validityDays,
       items: data.items as BudgetItem[],
       updatedAt: new Date(),

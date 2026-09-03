@@ -8,6 +8,7 @@ export const es = {
     remove: "Quitar",
     optional: "Opcional",
     copyLink: "Copiar link",
+    shareWhatsapp: "Enviar por WhatsApp",
     linkCopied: "Link copiado",
     logout: "Cerrar sesión",
   },
@@ -65,6 +66,11 @@ export const es = {
     addItem: "Agregar ítem",
     fieldConditions: "Condiciones",
     fieldConditionsPlaceholder: "Forma de pago, plazos, alcance no incluido…",
+    fieldPaymentLink: "Link de pago (opcional)",
+    fieldPaymentLinkHintArs:
+      "Pegá tu link de cobro de Mercado Pago. El cliente paga directo a vos — Presuly nunca toca esta plata.",
+    fieldPaymentLinkHintOther:
+      "Pegá tu link de cobro (Stripe, PayPal, etc). El cliente paga directo a vos — Presuly nunca toca esta plata.",
     fieldCurrency: "Moneda",
     fieldValidityDays: "Válido por (días)",
     total: "Total",
@@ -92,6 +98,7 @@ export const es = {
     acceptedTitle: "¡Presupuesto aceptado!",
     acceptedBody: "Te mandamos una copia en PDF a tu email.",
     downloadPdf: "Descargar PDF",
+    pay: "Pagar",
     poweredBy: "Hecho con Presuly — creá tu presupuesto gratis",
     signatureNote:
       "Esto es un registro de aceptación con sello de tiempo, no una firma digital certificada.",
