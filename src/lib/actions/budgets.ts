@@ -3,13 +3,14 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { eq, and, inArray, count } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { budgets, acceptances, users, type BudgetItem } from "@/lib/db/schema";
 import { getSession } from "@/lib/auth/session";
 import { getLocale } from "@/lib/i18n/server";
+import { activeBudgetLimit, ACTIVE_BUDGET_STATUSES, hasBranding } from "@/lib/plans";
 import { renderBudgetPdf } from "@/lib/pdf/budget-pdf";
 import { sendEmail } from "@/lib/email/resend";
 import {
@@ -93,6 +94,20 @@ export async function createBudget(formData: FormData) {
   const session = await requireSession();
   const locale = await getLocale();
   const data = parseBudgetForm(formData);
+
+  const [owner] = await db.select().from(users).where(eq(users.id, session.userId)).limit(1);
+  const limit = activeBudgetLimit(owner!);
+  if (limit !== null) {
+    const [{ value: activeCount }] = await db
+      .select({ value: count() })
+      .from(budgets)
+      .where(
+        and(eq(budgets.userId, session.userId), inArray(budgets.status, ACTIVE_BUDGET_STATUSES))
+      );
+    if (activeCount >= limit) {
+      redirect("/dashboard/new?error=limit_reached");
+    }
+  }
 
   const [created] = await db
     .insert(budgets)
@@ -234,10 +249,17 @@ export async function acceptBudget(
       .set({ status: "accepted", items: finalItems, acceptedAt: now, updatedAt: now })
       .where(eq(budgets.id, budget.id));
 
+    const [owner] = await db
+      .select({ email: users.email, plan: users.plan, planStatus: users.planStatus })
+      .from(users)
+      .where(eq(users.id, budget.userId))
+      .limit(1);
+
     const pdf = await renderBudgetPdf(
       { ...budget, items: finalItems, status: "accepted", acceptedAt: now },
       acceptance,
-      budget.locale as "es" | "en"
+      budget.locale as "es" | "en",
+      !owner || hasBranding(owner)
     );
 
     const ownerMail = budgetAcceptedOwnerEmail(budget.locale as "es" | "en", {
@@ -246,12 +268,6 @@ export async function acceptBudget(
     });
 
     const emailTasks: Promise<unknown>[] = [];
-
-    const [owner] = await db
-      .select({ email: users.email })
-      .from(users)
-      .where(eq(users.id, budget.userId))
-      .limit(1);
 
     if (owner?.email) {
       emailTasks.push(

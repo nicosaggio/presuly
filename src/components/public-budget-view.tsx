@@ -22,6 +22,7 @@ export function PublicBudgetView({
   locale,
   acceptAction,
   isExpired,
+  showBranding,
 }: {
   budget: Budget;
   acceptance: Acceptance | null;
@@ -33,6 +34,8 @@ export function PublicBudgetView({
   ) => Promise<AcceptBudgetState>;
   /** Calculado en el servidor (no en el cliente) para no depender del reloj del navegador. */
   isExpired: boolean;
+  /** false cuando el emisor está en un plan pago: oculta la marca de Presuly. */
+  showBranding: boolean;
 }) {
   const [items, setItems] = useState<BudgetItem[]>(budget.items);
   const [state, formAction, isPending] = useActionState(acceptAction, initialState);
@@ -196,14 +199,16 @@ export function PublicBudgetView({
         </Card>
       )}
 
-      <footer className="pt-6 text-center">
-        <Link
-          href="/?utm_source=budget_footer"
-          className="text-xs text-muted-foreground hover:text-foreground"
-        >
-          {dict.publicView.poweredBy}
-        </Link>
-      </footer>
+      {showBranding && (
+        <footer className="pt-6 text-center">
+          <Link
+            href="/?utm_source=budget_footer"
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            {dict.publicView.poweredBy}
+          </Link>
+        </footer>
+      )}
     </div>
   );
 }

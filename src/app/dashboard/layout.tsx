@@ -1,15 +1,29 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
+import { getUserById } from "@/lib/db/queries";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
+import { effectivePlan } from "@/lib/plans";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { LogoutButton } from "@/components/logout-button";
+import { Badge } from "@/components/ui/badge";
 
 export default async function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
   const session = await getSession();
   if (!session) redirect("/login");
 
-  const [dict, locale] = await Promise.all([getDictionary(), getLocale()]);
+  const [dict, locale, user] = await Promise.all([
+    getDictionary(),
+    getLocale(),
+    getUserById(session.userId),
+  ]);
+  const plan = user ? effectivePlan(user) : "free";
+  const planLabel =
+    plan === "free"
+      ? dict.dashboard.planBadgeFree
+      : plan === "pro"
+        ? dict.dashboard.planBadgePro
+        : dict.dashboard.planBadgeStudio;
 
   return (
     <div className="flex flex-col flex-1">
@@ -18,6 +32,9 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
           {dict.common.appName}
         </Link>
         <div className="flex items-center gap-4">
+          <Link href="/dashboard/billing">
+            <Badge variant={plan === "free" ? "outline" : "default"}>{planLabel}</Badge>
+          </Link>
           <LocaleSwitcher current={locale} />
           <LogoutButton label={dict.common.logout} />
         </div>

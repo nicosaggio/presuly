@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
-import { getBudgetByToken, getAcceptanceForBudget } from "@/lib/db/queries";
+import { getBudgetByToken, getAcceptanceForBudget, getUserById } from "@/lib/db/queries";
 import { recordBudgetView, acceptBudget } from "@/lib/actions/budgets";
 import { dictionaries, type Locale } from "@/lib/i18n";
+import { hasBranding } from "@/lib/plans";
 import { PublicBudgetView } from "@/components/public-budget-view";
 
 export const dynamic = "force-dynamic";
@@ -23,8 +24,11 @@ export default async function PublicBudgetPage(props: PageProps<"/p/[token]">) {
     after(() => recordBudgetView(budget.id));
   }
 
-  const acceptance =
-    budget.status === "accepted" ? await getAcceptanceForBudget(budget.id) : null;
+  const [acceptance, owner] = await Promise.all([
+    budget.status === "accepted" ? getAcceptanceForBudget(budget.id) : Promise.resolve(null),
+    getUserById(budget.userId),
+  ]);
+  const showBranding = !owner || hasBranding(owner);
   const locale = (budget.locale as Locale) ?? "es";
   const dict = dictionaries[locale];
   const boundAccept = acceptBudget.bind(null, token);
@@ -43,6 +47,7 @@ export default async function PublicBudgetPage(props: PageProps<"/p/[token]">) {
       locale={locale}
       acceptAction={boundAccept}
       isExpired={isExpired}
+      showBranding={showBranding}
     />
   );
 }

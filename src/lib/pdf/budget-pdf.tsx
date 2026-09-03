@@ -70,10 +70,12 @@ export function BudgetPdfDocument({
   budget,
   acceptance,
   locale,
+  showBranding = true,
 }: {
   budget: Budget;
   acceptance?: Acceptance | null;
   locale: Locale;
+  showBranding?: boolean;
 }) {
   const total = billableTotal(budget.items);
   const isEn = locale === "en";
@@ -152,11 +154,13 @@ export function BudgetPdfDocument({
           </View>
         ) : null}
 
-        <Text style={styles.footer} fixed>
-          {isEn
-            ? "Made with Presuly — create your free proposal at presuly.com.ar"
-            : "Hecho con Presuly — creá tu presupuesto gratis en presuly.com.ar"}
-        </Text>
+        {showBranding && (
+          <Text style={styles.footer} fixed>
+            {isEn
+              ? "Made with Presuly — create your free proposal at presuly.com.ar"
+              : "Hecho con Presuly — creá tu presupuesto gratis en presuly.com.ar"}
+          </Text>
+        )}
       </Page>
     </Document>
   );
@@ -165,9 +169,15 @@ export function BudgetPdfDocument({
 export async function renderBudgetPdf(
   budget: Budget,
   acceptance: Acceptance | null,
-  locale: Locale
+  locale: Locale,
+  showBranding = true
 ): Promise<Buffer> {
   return renderToBuffer(
-    <BudgetPdfDocument budget={budget} acceptance={acceptance} locale={locale} />
+    <BudgetPdfDocument
+      budget={budget}
+      acceptance={acceptance}
+      locale={locale}
+      showBranding={showBranding}
+    />
   );
 }

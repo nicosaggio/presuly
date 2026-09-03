@@ -16,11 +16,25 @@ export const budgetStatusEnum = pgEnum("budget_status", [
   "expired",
 ]);
 
+export const planEnum = pgEnum("plan", ["free", "pro", "studio"]);
+
+export const planStatusEnum = pgEnum("plan_status", [
+  "active",
+  "past_due",
+  "canceled",
+  "paused",
+]);
+
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name"),
   locale: text("locale").notNull().default("es"),
+  plan: planEnum("plan").notNull().default("free"),
+  planStatus: planStatusEnum("plan_status").notNull().default("active"),
+  paddleCustomerId: text("paddle_customer_id"),
+  paddleSubscriptionId: text("paddle_subscription_id"),
+  planRenewsAt: timestamp("plan_renews_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
