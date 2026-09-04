@@ -131,3 +131,21 @@
     @apply font-sans;
   }
 }
+
+/* Swap logo claro/oscuro para <Logo variant="auto">: el logotipo normal usa
+   texto en --presuly-tinta (casi negro), invisible sobre el fondo oscuro del
+   modo dark. Mismo gate que las variables de modo oscuro en presuly-tokens.css. */
+.presuly-logo-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    .presuly-logo-light {
+      display: none;
+    }
+    .presuly-logo-dark {
+      display: inline-block;
+    }
+  }
+}
