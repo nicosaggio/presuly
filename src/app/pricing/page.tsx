@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 
 export const metadata: Metadata = {
   title: "Precios | Presuly",
-  description: "Planes y precios de Presuly: gratis para siempre, o Pro por USD 9/mes.",
+  description: `Planes y precios de Presuly: gratis para siempre, o Pro por USD ${PLAN_PRICES.pro.monthlyUSD}/mes.`,
 };
 
 export default async function PricingPage() {

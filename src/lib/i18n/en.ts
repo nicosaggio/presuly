@@ -29,7 +29,7 @@ export const en: Dictionary = {
     freeNote: "Free forever: up to 3 active proposals at a time, no card required.",
     pricingTeaserTitle: "Need more active proposals?",
     pricingTeaserBody:
-      "Pro gives you unlimited proposals, no Presuly badge, and automatic reminders. From USD 9/mo.",
+      "Pro gives you unlimited proposals, no Presuly badge, and automatic reminders. From USD 5/mo.",
     pricingTeaserCta: "See plans and pricing",
     howItWorksTitle: "How it works",
     howItWorksSubtitle:

@@ -27,7 +27,7 @@ export const es = {
     freeNote: "Gratis para siempre: hasta 3 presupuestos activos a la vez, sin tarjeta.",
     pricingTeaserTitle: "¿Necesitás más presupuestos activos?",
     pricingTeaserBody:
-      "Con el plan Pro tenés presupuestos ilimitados, sin la marca de Presuly y recordatorios automáticos. Desde USD 9/mes.",
+      "Con el plan Pro tenés presupuestos ilimitados, sin la marca de Presuly y recordatorios automáticos. Desde USD 5/mes.",
     pricingTeaserCta: "Ver planes y precios",
     howItWorksTitle: "¿Cómo funciona?",
     howItWorksSubtitle:
