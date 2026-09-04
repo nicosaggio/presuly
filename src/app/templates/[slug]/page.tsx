@@ -22,6 +22,7 @@ export async function generateMetadata(
   return {
     title: `${template.title.es} — Plantilla gratis | Presuly`,
     description: template.intro.es,
+    alternates: { canonical: `/templates/${slug}` },
   };
 }
 
@@ -44,8 +45,28 @@ export default async function TemplateDetailPage(props: PageProps<"/templates/[s
     .filter((i) => !i.optional)
     .reduce((sum, i) => sum + i.price, 0);
 
+  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Presuly", item: appUrl },
+      { "@type": "ListItem", position: 2, name: "Plantillas", item: `${appUrl}/templates` },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: template.title.es,
+        item: `${appUrl}/templates/${template.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-xl px-6 py-16 space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <Suspense fallback={null}>
         <AttributionCapture implicitSource="template_gallery" />
       </Suspense>

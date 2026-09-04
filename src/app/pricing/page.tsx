@@ -12,6 +12,40 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 export const metadata: Metadata = {
   title: "Precios | Presuly",
   description: `Planes y precios de Presuly: gratis para siempre, o Pro por USD ${PLAN_PRICES.pro.monthlyUSD}/mes.`,
+  alternates: { canonical: "/pricing" },
+};
+
+const pricingJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "Presuly",
+  description: "Presupuestos y propuestas que se envían como link, con firma electrónica simple.",
+  offers: [
+    {
+      "@type": "Offer",
+      name: "Gratis",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    {
+      "@type": "Offer",
+      name: "Pro (mensual)",
+      price: String(PLAN_PRICES.pro.monthlyUSD),
+      priceCurrency: "USD",
+    },
+    {
+      "@type": "Offer",
+      name: "Pro (anual)",
+      price: String(PLAN_PRICES.pro.annualUSD),
+      priceCurrency: "USD",
+    },
+    {
+      "@type": "Offer",
+      name: "Estudio (mensual)",
+      price: String(PLAN_PRICES.studio.monthlyUSD),
+      priceCurrency: "USD",
+    },
+  ],
 };
 
 export default async function PricingPage() {
@@ -28,8 +62,14 @@ export default async function PricingPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16 space-y-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }}
+      />
       <header className="space-y-2 text-center">
-        <h1 className="text-3xl font-semibold">{dict.billing.title}</h1>
+        <h1 className="text-3xl font-semibold">
+          {user ? dict.billing.title : dict.billing.publicTitle}
+        </h1>
         <p className="text-muted-foreground">{dict.landing.freeNote}</p>
       </header>
 

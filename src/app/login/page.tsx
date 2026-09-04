@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getDictionary } from "@/lib/i18n/server";
 import { getSession } from "@/lib/auth/session";
 import { LoginForm } from "@/components/login-form";
 import { Logo } from "@/components/logo";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
+// Página de acceso, sin contenido único para buscadores — se excluye del índice
+// (ver también robots.ts, que ya bloquea el crawling de /login).
+export const metadata: Metadata = {
+  title: "Entrá a tu cuenta | Presuly",
+  robots: { index: false, follow: true },
+};
 
 export default async function LoginPage(props: PageProps<"/login">) {
   const session = await getSession();

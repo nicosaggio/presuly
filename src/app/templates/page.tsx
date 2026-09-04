@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Plantillas de presupuestos gratis | Presuly",
   description:
     "Plantillas de presupuesto listas para usar por rubro: diseño web, branding, fotografía, reformas y más.",
+  alternates: { canonical: "/templates" },
 };
 
 export default async function TemplatesGalleryPage() {
