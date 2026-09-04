@@ -42,7 +42,7 @@ export default async function NewBudgetPage(props: PageProps<"/dashboard/new">) 
           </Link>
         </div>
       ) : (
-        <BudgetForm dict={dict} action={createBudget} initialValues={initialValues} />
+        <BudgetForm dict={dict} locale={locale} action={createBudget} initialValues={initialValues} />
       )}
     </div>
   );

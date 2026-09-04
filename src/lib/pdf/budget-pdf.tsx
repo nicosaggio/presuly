@@ -3,6 +3,7 @@ import {
   Page,
   Text,
   View,
+  Link,
   StyleSheet,
   renderToBuffer,
 } from "@react-pdf/renderer";
@@ -152,11 +153,15 @@ export function BudgetPdfDocument({
         ) : null}
 
         {showBranding && (
-          <Text style={styles.footer} fixed>
+          <Link
+            src="https://presuly.com.ar?utm_source=pdf_footer"
+            style={styles.footer}
+            fixed
+          >
             {isEn
               ? "Made with Presuly — create your free proposal at presuly.com.ar"
               : "Hecho con Presuly — creá tu presupuesto gratis en presuly.com.ar"}
-          </Text>
+          </Link>
         )}
       </Page>
     </Document>

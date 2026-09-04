@@ -41,7 +41,7 @@ export default async function EditBudgetPage(props: PageProps<"/dashboard/[id]">
         publicUrl={publicUrl}
         onPublish={publishAction}
       />
-      <BudgetForm dict={dict} budget={budget} action={boundUpdate} />
+      <BudgetForm dict={dict} locale={locale} budget={budget} action={boundUpdate} />
     </div>
   );
 }

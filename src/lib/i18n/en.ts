@@ -27,6 +27,10 @@ export const en: Dictionary = {
     cta: "Create a free proposal",
     ctaSecondary: "I already have an account",
     freeNote: "Free forever: up to 3 active proposals at a time, no card required.",
+    pricingTeaserTitle: "Need more active proposals?",
+    pricingTeaserBody:
+      "Pro gives you unlimited proposals, no Presuly badge, and automatic reminders. From USD 9/mo.",
+    pricingTeaserCta: "See plans and pricing",
   },
   auth: {
     loginTitle: "Log in to your account",
@@ -121,6 +125,8 @@ export const en: Dictionary = {
     itemDescription: "Description",
     itemPrice: "Price",
     itemOptional: "Optional (client can toggle it)",
+    itemOptionalTooltip:
+      "The client can add or remove this item from the proposal before accepting, and the total updates automatically.",
     addItem: "Add item",
     fieldConditions: "Conditions",
     fieldConditionsHint: "Payment terms, delivery timelines, revision policy — whatever you want in writing.",

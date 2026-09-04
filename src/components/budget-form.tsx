@@ -2,8 +2,9 @@
 
 import { useId, useState, useTransition } from "react";
 import { nanoid } from "nanoid";
-import type { Dictionary } from "@/lib/i18n";
+import type { Dictionary, Locale } from "@/lib/i18n";
 import type { Budget, BudgetItem } from "@/lib/db/schema";
+import { formatCurrency } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 import { toast } from "sonner";
 
 const CURRENCIES = ["ARS", "USD", "MXN", "EUR", "COP", "CLP"];
@@ -35,11 +38,13 @@ type TemplateValues = {
 
 export function BudgetForm({
   dict,
+  locale,
   budget,
   initialValues,
   action,
 }: {
   dict: Dictionary;
+  locale: Locale;
   budget?: Budget;
   /** Precarga de contenido (ej: desde una plantilla) cuando se crea un presupuesto nuevo. */
   initialValues?: TemplateValues;
@@ -58,7 +63,9 @@ export function BudgetForm({
   );
   const [kind, setKind] = useState(budget?.kind ?? "service");
   const [deliveryMode, setDeliveryMode] = useState(budget?.deliveryMode ?? "online");
+  const [priceDrafts, setPriceDrafts] = useState<Record<string, string>>({});
   const [isPending, startTransition] = useTransition();
+  const numberFormat = new Intl.NumberFormat(locale === "en" ? "en-US" : "es-AR");
 
   function updateItem(id: string, patch: Partial<BudgetItem>) {
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
@@ -87,8 +94,42 @@ export function BudgetForm({
     });
   }
 
+  function priceDisplayValue(item: BudgetItem) {
+    if (item.id in priceDrafts) return priceDrafts[item.id];
+    if (item.price === 0) return "";
+    return numberFormat.format(item.price);
+  }
+
+  function handlePriceFocus(item: BudgetItem, e: React.FocusEvent<HTMLInputElement>) {
+    setPriceDrafts((prev) => ({
+      ...prev,
+      [item.id]: item.price === 0 ? "" : String(item.price),
+    }));
+    e.currentTarget.select();
+  }
+
+  function handlePriceChange(item: BudgetItem, e: React.ChangeEvent<HTMLInputElement>) {
+    const cleaned = e.target.value.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
+    setPriceDrafts((prev) => ({ ...prev, [item.id]: cleaned }));
+    updateItem(item.id, { price: cleaned === "" ? 0 : Number(cleaned) || 0 });
+  }
+
+  function handlePriceBlur(item: BudgetItem) {
+    setPriceDrafts((prev) => {
+      const next = { ...prev };
+      delete next[item.id];
+      return next;
+    });
+  }
+
+  function handleFormKeyDown(e: React.KeyboardEvent<HTMLFormElement>) {
+    if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT") {
+      e.preventDefault();
+    }
+  }
+
   return (
-    <form id={formId} action={handleSubmit} className="space-y-8">
+    <form id={formId} action={handleSubmit} onKeyDown={handleFormKeyDown} className="space-y-8">
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="title">{dict.editor.fieldTitle}</Label>
@@ -180,6 +221,27 @@ export function BudgetForm({
         />
       </div>
 
+      <div className="space-y-2 max-w-xs">
+        <Label htmlFor="currency">{dict.editor.fieldCurrency}</Label>
+        <Select
+          value={currency}
+          onValueChange={(value) => {
+            if (value) setCurrency(value);
+          }}
+        >
+          <SelectTrigger id="currency" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CURRENCIES.map((c) => (
+              <SelectItem key={c} value={c}>
+                {c}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="space-y-3">
         <Label>{dict.editor.fieldItems}</Label>
         <p className="text-xs text-muted-foreground -mt-2">{dict.editor.fieldItemsHint}</p>
@@ -197,16 +259,13 @@ export function BudgetForm({
               />
               <Input
                 className="sm:w-32"
-                type="number"
-                min={0}
-                step="0.01"
+                type="text"
+                inputMode="decimal"
                 placeholder={dict.editor.itemPrice}
-                value={item.price === 0 ? "" : item.price}
-                onFocus={(e) => e.currentTarget.select()}
-                onChange={(e) => {
-                  const raw = e.target.value;
-                  updateItem(item.id, { price: raw === "" ? 0 : Number(raw) });
-                }}
+                value={priceDisplayValue(item)}
+                onFocus={(e) => handlePriceFocus(item, e)}
+                onChange={(e) => handlePriceChange(item, e)}
+                onBlur={() => handlePriceBlur(item)}
               />
               <label className="flex items-center gap-2 text-sm whitespace-nowrap">
                 <Checkbox
@@ -216,6 +275,20 @@ export function BudgetForm({
                   }
                 />
                 {dict.editor.itemOptional}
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground"
+                        aria-label={dict.editor.itemOptional}
+                      />
+                    }
+                  >
+                    <Info className="size-3.5" />
+                  </TooltipTrigger>
+                  <TooltipContent>{dict.editor.itemOptionalTooltip}</TooltipContent>
+                </Tooltip>
               </label>
               <Button
                 type="button"
@@ -265,43 +338,24 @@ export function BudgetForm({
         </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="currency">{dict.editor.fieldCurrency}</Label>
-          <Select
-            value={currency}
-            onValueChange={(value) => {
-              if (value) setCurrency(value);
-            }}
-          >
-            <SelectTrigger id="currency" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {CURRENCIES.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="validityDays">{dict.editor.fieldValidityDays}</Label>
-          <Input
-            id="validityDays"
-            name="validityDays"
-            type="number"
-            min={1}
-            max={180}
-            defaultValue={budget?.validityDays ?? 15}
-          />
-        </div>
+      <div className="space-y-2 max-w-xs">
+        <Label htmlFor="validityDays">{dict.editor.fieldValidityDays}</Label>
+        <Input
+          id="validityDays"
+          name="validityDays"
+          type="number"
+          min={1}
+          max={180}
+          defaultValue={budget?.validityDays ?? 15}
+        />
       </div>
 
       <div className="flex items-center justify-between border-t pt-4">
         <span className="text-sm text-muted-foreground">
-          {dict.editor.total}: <strong className="text-foreground">{total.toFixed(2)}</strong>
+          {dict.editor.total}:{" "}
+          <strong className="text-foreground">
+            {formatCurrency(total, currency, locale)}
+          </strong>
         </span>
         <Button type="submit" disabled={isPending}>
           {dict.editor.saveDraft}

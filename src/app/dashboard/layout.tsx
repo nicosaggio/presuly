@@ -28,9 +28,17 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
   return (
     <div className="flex flex-col flex-1">
       <header className="flex items-center justify-between px-6 py-4 border-b">
-        <Link href="/dashboard" className="font-semibold">
-          {dict.common.appName}
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/dashboard" className="font-semibold">
+            {dict.common.appName}
+          </Link>
+          <Link
+            href="/dashboard"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            {dict.dashboard.title}
+          </Link>
+        </div>
         <div className="flex items-center gap-4">
           <Link href="/dashboard/billing">
             <Badge variant={plan === "free" ? "outline" : "default"}>{planLabel}</Badge>

@@ -25,6 +25,10 @@ export const es = {
     cta: "Crear presupuesto gratis",
     ctaSecondary: "Ya tengo cuenta",
     freeNote: "Gratis para siempre: hasta 3 presupuestos activos a la vez, sin tarjeta.",
+    pricingTeaserTitle: "¿Necesitás más presupuestos activos?",
+    pricingTeaserBody:
+      "Con el plan Pro tenés presupuestos ilimitados, sin la marca de Presuly y recordatorios automáticos. Desde USD 9/mes.",
+    pricingTeaserCta: "Ver planes y precios",
   },
   auth: {
     loginTitle: "Entrá a tu cuenta",
@@ -120,6 +124,8 @@ export const es = {
     itemDescription: "Descripción",
     itemPrice: "Precio",
     itemOptional: "Opcional (el cliente puede tildarlo)",
+    itemOptionalTooltip:
+      "El cliente puede sumar o sacar este ítem del presupuesto antes de aceptarlo, y el total se recalcula solo.",
     addItem: "Agregar ítem",
     fieldConditions: "Condiciones",
     fieldConditionsHint: "Forma de pago, plazos de entrega, política de cambios — lo que quieras dejar por escrito.",
