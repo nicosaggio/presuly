@@ -142,10 +142,7 @@ export function BudgetPdfDocument({
             <Text style={styles.sealTitle}>
               {isEn ? "Accepted by" : "Aceptado por"} {acceptance.signerName}
             </Text>
-            <Text>
-              {formatDateTime(acceptance.createdAt, locale)}
-              {acceptance.ip ? ` · IP ${acceptance.ip}` : ""}
-            </Text>
+            <Text>{formatDateTime(acceptance.createdAt, locale)}</Text>
             <Text style={styles.sealNote}>
               {isEn
                 ? "This is a timestamped acceptance record, not a certified digital signature."
