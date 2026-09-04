@@ -64,6 +64,14 @@ export type BudgetItem = {
   selected: boolean;
 };
 
+export const budgetKindEnum = pgEnum("budget_kind", ["service", "product"]);
+
+export const deliveryModeEnum = pgEnum("delivery_mode", [
+  "online",
+  "in_person",
+  "hybrid",
+]);
+
 export const budgets = pgTable("budgets", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
@@ -73,6 +81,8 @@ export const budgets = pgTable("budgets", {
   status: budgetStatusEnum("status").notNull().default("draft"),
   locale: text("locale").notNull().default("es"),
   title: text("title").notNull(),
+  kind: budgetKindEnum("kind").notNull().default("service"),
+  deliveryMode: deliveryModeEnum("delivery_mode").notNull().default("online"),
   clientName: text("client_name").notNull(),
   clientEmail: text("client_email"),
   intro: text("intro"),

@@ -8,6 +8,7 @@ import { t } from "@/lib/i18n";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
 import type { AcceptBudgetState } from "@/lib/actions/budgets";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -57,11 +58,23 @@ export function PublicBudgetView({
 
   return (
     <div className="mx-auto max-w-xl px-4 py-10 space-y-8">
-      <header className="space-y-1">
+      <header className="space-y-2">
         <h1 className="text-2xl font-semibold text-balance">{budget.title}</h1>
         <p className="text-muted-foreground">
           {dict.publicView.preparedFor} {budget.clientName}
         </p>
+        <div className="flex gap-2">
+          <Badge variant="outline">
+            {budget.kind === "product" ? dict.editor.kindProduct : dict.editor.kindService}
+          </Badge>
+          <Badge variant="outline">
+            {budget.deliveryMode === "online"
+              ? dict.editor.deliveryOnline
+              : budget.deliveryMode === "in_person"
+                ? dict.editor.deliveryInPerson
+                : dict.editor.deliveryHybrid}
+          </Badge>
+        </div>
       </header>
 
       {budget.intro && <p className="text-pretty">{budget.intro}</p>}

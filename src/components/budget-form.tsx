@@ -56,6 +56,8 @@ export function BudgetForm({
   const [currency, setCurrency] = useState(
     budget?.currency ?? initialValues?.currency ?? "ARS"
   );
+  const [kind, setKind] = useState(budget?.kind ?? "service");
+  const [deliveryMode, setDeliveryMode] = useState(budget?.deliveryMode ?? "online");
   const [isPending, startTransition] = useTransition();
 
   function updateItem(id: string, patch: Partial<BudgetItem>) {
@@ -77,6 +79,8 @@ export function BudgetForm({
   function handleSubmit(formData: FormData) {
     formData.set("items", JSON.stringify(items));
     formData.set("currency", currency);
+    formData.set("kind", kind);
+    formData.set("deliveryMode", deliveryMode);
     startTransition(async () => {
       await action(formData);
       toast.success(dict.editor.saved);
@@ -111,8 +115,50 @@ export function BudgetForm({
         </div>
       </div>
 
+      <div className="grid gap-6 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="kind">{dict.editor.fieldKind}</Label>
+          <Select value={kind} onValueChange={(v) => v && setKind(v as typeof kind)}>
+            <SelectTrigger id="kind" className="w-full">
+              <SelectValue>
+                {(v: string) => (v === "product" ? dict.editor.kindProduct : dict.editor.kindService)}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="service">{dict.editor.kindService}</SelectItem>
+              <SelectItem value="product">{dict.editor.kindProduct}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="deliveryMode">{dict.editor.fieldDeliveryMode}</Label>
+          <Select
+            value={deliveryMode}
+            onValueChange={(v) => v && setDeliveryMode(v as typeof deliveryMode)}
+          >
+            <SelectTrigger id="deliveryMode" className="w-full">
+              <SelectValue>
+                {(v: string) =>
+                  v === "in_person"
+                    ? dict.editor.deliveryInPerson
+                    : v === "hybrid"
+                      ? dict.editor.deliveryHybrid
+                      : dict.editor.deliveryOnline
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="online">{dict.editor.deliveryOnline}</SelectItem>
+              <SelectItem value="in_person">{dict.editor.deliveryInPerson}</SelectItem>
+              <SelectItem value="hybrid">{dict.editor.deliveryHybrid}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="intro">{dict.editor.fieldIntro}</Label>
+        <p className="text-xs text-muted-foreground">{dict.editor.fieldIntroHint}</p>
         <Textarea
           id="intro"
           name="intro"
@@ -124,16 +170,19 @@ export function BudgetForm({
 
       <div className="space-y-2">
         <Label htmlFor="scope">{dict.editor.fieldScope}</Label>
+        <p className="text-xs text-muted-foreground">{dict.editor.fieldScopeHint}</p>
         <Textarea
           id="scope"
           name="scope"
           defaultValue={budget?.scope ?? initialValues?.scope ?? ""}
+          placeholder={dict.editor.fieldScopePlaceholder}
           rows={4}
         />
       </div>
 
       <div className="space-y-3">
         <Label>{dict.editor.fieldItems}</Label>
+        <p className="text-xs text-muted-foreground -mt-2">{dict.editor.fieldItemsHint}</p>
         <div className="space-y-3">
           {items.map((item) => (
             <div
@@ -152,10 +201,12 @@ export function BudgetForm({
                 min={0}
                 step="0.01"
                 placeholder={dict.editor.itemPrice}
-                value={item.price}
-                onChange={(e) =>
-                  updateItem(item.id, { price: Number(e.target.value) || 0 })
-                }
+                value={item.price === 0 ? "" : item.price}
+                onFocus={(e) => e.currentTarget.select()}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  updateItem(item.id, { price: raw === "" ? 0 : Number(raw) });
+                }}
               />
               <label className="flex items-center gap-2 text-sm whitespace-nowrap">
                 <Checkbox
@@ -184,6 +235,7 @@ export function BudgetForm({
 
       <div className="space-y-2">
         <Label htmlFor="conditions">{dict.editor.fieldConditions}</Label>
+        <p className="text-xs text-muted-foreground">{dict.editor.fieldConditionsHint}</p>
         <Textarea
           id="conditions"
           name="conditions"

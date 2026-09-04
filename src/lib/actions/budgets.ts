@@ -30,6 +30,8 @@ const itemSchema = z.object({
 
 const budgetFormSchema = z.object({
   title: z.string().trim().min(1),
+  kind: z.enum(["service", "product"]),
+  deliveryMode: z.enum(["online", "in_person", "hybrid"]),
   clientName: z.string().trim().min(1),
   clientEmail: z
     .union([z.literal(""), z.string().trim().email()])
@@ -60,6 +62,8 @@ function parseBudgetForm(formData: FormData) {
 
   return budgetFormSchema.parse({
     title: formData.get("title"),
+    kind: formData.get("kind") || "service",
+    deliveryMode: formData.get("deliveryMode") || "online",
     clientName: formData.get("clientName"),
     clientEmail: formData.get("clientEmail") ?? "",
     intro: formData.get("intro") ?? "",
@@ -117,6 +121,8 @@ export async function createBudget(formData: FormData) {
       token: nanoid(21),
       locale,
       title: data.title,
+      kind: data.kind,
+      deliveryMode: data.deliveryMode,
       clientName: data.clientName,
       clientEmail: data.clientEmail,
       intro: data.intro,
@@ -140,6 +146,8 @@ export async function updateBudget(id: string, formData: FormData) {
     .update(budgets)
     .set({
       title: data.title,
+      kind: data.kind,
+      deliveryMode: data.deliveryMode,
       clientName: data.clientName,
       clientEmail: data.clientEmail,
       intro: data.intro,
