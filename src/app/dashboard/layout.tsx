@@ -35,51 +35,38 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
 
   return (
     <div className="flex flex-col flex-1">
-      <header className="flex flex-wrap items-center justify-between gap-y-2 px-4 py-3 border-b sm:px-6 sm:py-4">
-        <div className="flex items-center gap-4 sm:gap-6">
-          <Link href="/dashboard" aria-label={dict.common.appName}>
+      <header className="border-b">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+          <Link href="/dashboard" aria-label={dict.common.appName} className="shrink-0">
             <Logo size="sm" />
           </Link>
-          <Link
-            href="/dashboard"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+            <Link href="/dashboard/billing" className="shrink-0">
+              <Badge variant={plan === "free" ? "outline" : "default"}>{planLabel}</Badge>
+            </Link>
+            <LocaleSwitcher current={locale} />
+            <LogoutButton label={dict.common.logout} iconOnly />
+          </div>
+        </div>
+        <nav className="flex items-center gap-4 overflow-x-auto px-4 pb-3 text-sm whitespace-nowrap sm:gap-6 sm:px-6">
+          <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
             {dict.dashboard.title}
           </Link>
-          <Link
-            href="/templates"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
+          <Link href="/templates" className="text-muted-foreground hover:text-foreground">
             {dict.common.templates}
           </Link>
-          <Link
-            href="/#como-funciona"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
+          <Link href="/#como-funciona" className="text-muted-foreground hover:text-foreground">
             {dict.common.howItWorks}
           </Link>
-        </div>
-        <div className="flex items-center gap-3 sm:gap-4">
-          <Link href="/dashboard/billing">
-            <Badge variant={plan === "free" ? "outline" : "default"}>{planLabel}</Badge>
+          <Link href="/dashboard/profile" className="text-muted-foreground hover:text-foreground">
+            {dict.profile.navLabel}
           </Link>
           {session.email === process.env.ADMIN_EMAIL && (
-            <Link
-              href="/dashboard/metrics"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
+            <Link href="/dashboard/metrics" className="text-muted-foreground hover:text-foreground">
               k
             </Link>
           )}
-          <Link
-            href="/dashboard/profile"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            {dict.profile.navLabel}
-          </Link>
-          <LocaleSwitcher current={locale} />
-          <LogoutButton label={dict.common.logout} />
-        </div>
+        </nav>
       </header>
       <main className="flex-1 px-6 py-8 w-full max-w-3xl mx-auto">{children}</main>
     </div>
