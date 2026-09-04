@@ -16,6 +16,7 @@
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@neondatabase/serverless": "^1.1.0",
+    "@netlify/blobs": "^11.0.3",
     "@paddle/paddle-js": "^1.6.5",
     "@paddle/paddle-node-sdk": "^3.10.0",
     "@react-pdf/renderer": "^4.9.0",

@@ -1,9 +1,10 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useRef, useState, useTransition } from "react";
 import { nanoid } from "nanoid";
 import type { Dictionary, Locale } from "@/lib/i18n";
-import type { Budget, BudgetItem } from "@/lib/db/schema";
+import { t } from "@/lib/i18n";
+import type { Budget, BudgetItem, BudgetAttachment } from "@/lib/db/schema";
 import { formatCurrency } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,10 +19,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
+import { Info, Paperclip, X } from "lucide-react";
 import { toast } from "sonner";
 
 const CURRENCIES = ["ARS", "USD", "MXN", "EUR", "COP", "CLP"];
+
+const MAX_ATTACHMENTS = 5;
+const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024;
+const ALLOWED_ATTACHMENT_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "text/csv",
+]);
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 function emptyItem(): BudgetItem {
   return { id: nanoid(8), description: "", price: 0, optional: false, selected: true };
@@ -64,6 +86,11 @@ export function BudgetForm({
   const [kind, setKind] = useState(budget?.kind ?? "service");
   const [deliveryMode, setDeliveryMode] = useState(budget?.deliveryMode ?? "online");
   const [priceDrafts, setPriceDrafts] = useState<Record<string, string>>({});
+  const [existingAttachments, setExistingAttachments] = useState<BudgetAttachment[]>(
+    budget?.attachments ?? []
+  );
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = useTransition();
   const numberFormat = new Intl.NumberFormat(locale === "en" ? "en-US" : "es-AR");
 
@@ -88,10 +115,45 @@ export function BudgetForm({
     formData.set("currency", currency);
     formData.set("kind", kind);
     formData.set("deliveryMode", deliveryMode);
+    formData.set("keptAttachments", JSON.stringify(existingAttachments.map((a) => a.id)));
+    for (const file of newFiles) {
+      formData.append("newAttachments", file);
+    }
     startTransition(async () => {
       await action(formData);
       toast.success(dict.editor.saved);
     });
+  }
+
+  function handleFilesSelected(fileList: FileList | null) {
+    if (!fileList) return;
+    const files = Array.from(fileList);
+    const room = MAX_ATTACHMENTS - existingAttachments.length - newFiles.length;
+    if (files.length > room) {
+      toast.error(dict.editor.attachmentTooMany);
+    }
+    const accepted: File[] = [];
+    for (const file of files.slice(0, Math.max(room, 0))) {
+      if (file.size > MAX_ATTACHMENT_SIZE) {
+        toast.error(t(dict.editor.attachmentTooLarge, { name: file.name }));
+        continue;
+      }
+      if (!ALLOWED_ATTACHMENT_TYPES.has(file.type)) {
+        toast.error(t(dict.editor.attachmentInvalidType, { name: file.name }));
+        continue;
+      }
+      accepted.push(file);
+    }
+    if (accepted.length > 0) setNewFiles((prev) => [...prev, ...accepted]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function removeExistingAttachment(id: string) {
+    setExistingAttachments((prev) => prev.filter((a) => a.id !== id));
+  }
+
+  function removeNewFile(index: number) {
+    setNewFiles((prev) => prev.filter((_, i) => i !== index));
   }
 
   function priceDisplayValue(item: BudgetItem) {
@@ -303,6 +365,72 @@ export function BudgetForm({
         </div>
         <Button type="button" variant="outline" size="sm" onClick={addItem}>
           {dict.editor.addItem}
+        </Button>
+      </div>
+
+      <div className="space-y-3">
+        <Label>{dict.editor.fieldAttachments}</Label>
+        <p className="text-xs text-muted-foreground -mt-2">{dict.editor.fieldAttachmentsHint}</p>
+        {(existingAttachments.length > 0 || newFiles.length > 0) && (
+          <div className="space-y-2">
+            {existingAttachments.map((a) => (
+              <div
+                key={a.id}
+                className="flex items-center justify-between gap-2 rounded-lg border p-2 text-sm"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <Paperclip className="size-3.5 shrink-0 text-muted-foreground" />
+                  <span className="truncate">{a.name}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {formatFileSize(a.size)}
+                  </span>
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeExistingAttachment(a.id)}
+                >
+                  <X className="size-3.5" />
+                </Button>
+              </div>
+            ))}
+            {newFiles.map((file, i) => (
+              <div
+                key={`${file.name}-${i}`}
+                className="flex items-center justify-between gap-2 rounded-lg border p-2 text-sm"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <Paperclip className="size-3.5 shrink-0 text-muted-foreground" />
+                  <span className="truncate">{file.name}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {formatFileSize(file.size)}
+                  </span>
+                </span>
+                <Button type="button" variant="ghost" size="sm" onClick={() => removeNewFile(i)}>
+                  <X className="size-3.5" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.doc,.docx,.xls,.xlsx,.csv"
+          className="hidden"
+          onChange={(e) => handleFilesSelected(e.target.files)}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={existingAttachments.length + newFiles.length >= MAX_ATTACHMENTS}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Paperclip className="size-3.5" />
+          {dict.editor.addAttachment}
         </Button>
       </div>
 

@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
+import { Paperclip } from "lucide-react";
 import type { Budget, BudgetItem, Acceptance } from "@/lib/db/schema";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
@@ -15,6 +16,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const initialState: AcceptBudgetState = { ok: false };
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 export function PublicBudgetView({
   budget,
@@ -123,6 +130,29 @@ export function PublicBudgetView({
           <span className="tabular-nums">{formatCurrency(total, budget.currency, locale)}</span>
         </div>
       </section>
+
+      {budget.attachments.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-sm font-semibold uppercase text-muted-foreground">
+            {dict.publicView.attachmentsTitle}
+          </h2>
+          <div className="space-y-2">
+            {budget.attachments.map((a) => (
+              <a
+                key={a.id}
+                href={`/api/attachments/${a.key}?name=${encodeURIComponent(a.name)}`}
+                className="flex items-center gap-2 rounded-lg border p-2 text-sm hover:bg-accent/50"
+              >
+                <Paperclip className="size-3.5 shrink-0 text-muted-foreground" />
+                <span className="min-w-0 flex-1 truncate">{a.name}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {formatFileSize(a.size)}
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       {budget.conditions && (
         <section className="space-y-2">

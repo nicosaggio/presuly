@@ -129,6 +129,23 @@ export function BudgetPdfDocument({
           </View>
         </View>
 
+        {budget.attachments.length > 0 ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              {isEn ? "Attachments" : "Adjuntos"}
+            </Text>
+            {budget.attachments.map((a) => (
+              <Link
+                key={a.id}
+                src={`${process.env.APP_URL ?? "https://presuly.com.ar"}/api/attachments/${a.key}?name=${encodeURIComponent(a.name)}`}
+                style={{ color: "#18181b", marginBottom: 4 }}
+              >
+                {a.name}
+              </Link>
+            ))}
+          </View>
+        ) : null}
+
         {budget.conditions ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>

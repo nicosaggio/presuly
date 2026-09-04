@@ -64,6 +64,16 @@ export type BudgetItem = {
   selected: boolean;
 };
 
+export type BudgetAttachment = {
+  id: string;
+  /** Nombre original del archivo, para mostrar y para el header de descarga. */
+  name: string;
+  contentType: string;
+  size: number;
+  /** Clave del blob en Netlify Blobs (ver src/lib/storage/attachments.ts) — no adivinable. */
+  key: string;
+};
+
 export const budgetKindEnum = pgEnum("budget_kind", ["service", "product"]);
 
 export const deliveryModeEnum = pgEnum("delivery_mode", [
@@ -88,6 +98,7 @@ export const budgets = pgTable("budgets", {
   intro: text("intro"),
   scope: text("scope"),
   items: jsonb("items").notNull().$type<BudgetItem[]>().default([]),
+  attachments: jsonb("attachments").notNull().$type<BudgetAttachment[]>().default([]),
   conditions: text("conditions"),
   currency: text("currency").notNull().default("ARS"),
   /** Link de pago externo (Mercado Pago, Stripe, PayPal...) que pega el propio

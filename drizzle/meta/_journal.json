@@ -43,6 +43,13 @@
       "when": 1788534583306,
       "tag": "0005_harsh_the_anarchist",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788536724296,
+      "tag": "0006_gray_zzzax",
+      "breakpoints": true
     }
   ]
 }

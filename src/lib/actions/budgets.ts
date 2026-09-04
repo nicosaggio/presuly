@@ -7,13 +7,20 @@ import { eq, and, inArray, count } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { budgets, acceptances, users, type BudgetItem } from "@/lib/db/schema";
+import { budgets, acceptances, users, type BudgetItem, type BudgetAttachment } from "@/lib/db/schema";
 import { getSession } from "@/lib/auth/session";
 import { getLocale } from "@/lib/i18n/server";
 import { activeBudgetLimit, ACTIVE_BUDGET_STATUSES, hasBranding } from "@/lib/plans";
 import { grantReferralReward } from "@/lib/actions/referrals";
 import { renderBudgetPdf } from "@/lib/pdf/budget-pdf";
 import { sendEmail } from "@/lib/email/resend";
+import {
+  ALLOWED_ATTACHMENT_TYPES,
+  MAX_ATTACHMENTS,
+  MAX_ATTACHMENT_SIZE,
+  uploadAttachment,
+  deleteAttachment,
+} from "@/lib/storage/attachments";
 import {
   budgetAcceptedClientEmail,
   budgetAcceptedOwnerEmail,
@@ -76,6 +83,54 @@ function parseBudgetForm(formData: FormData) {
   });
 }
 
+/**
+ * Junta los adjuntos que se mantienen (por id, mandados como JSON) con los archivos nuevos
+ * del input de la parte del form. Sube los nuevos a Netlify Blobs y borra los que se sacaron.
+ * Tira Error en el primer archivo inválido — el form ya valida esto mismo del lado del cliente,
+ * así que llegar hasta acá con algo inválido debería ser raro.
+ */
+async function resolveAttachments(
+  formData: FormData,
+  existing: BudgetAttachment[]
+): Promise<BudgetAttachment[]> {
+  const rawKept = formData.get("keptAttachments");
+  let keptIds = existing.map((a) => a.id);
+  if (typeof rawKept === "string" && rawKept.length > 0) {
+    try {
+      keptIds = z.array(z.string()).parse(JSON.parse(rawKept));
+    } catch {
+      // valor inesperado: no se saca nada por las dudas
+    }
+  }
+
+  const kept = existing.filter((a) => keptIds.includes(a.id));
+  const removed = existing.filter((a) => !keptIds.includes(a.id));
+  const newFiles = formData
+    .getAll("newAttachments")
+    .filter((f): f is File => f instanceof File && f.size > 0);
+
+  if (kept.length + newFiles.length > MAX_ATTACHMENTS) {
+    throw new Error(`No se pueden tener más de ${MAX_ATTACHMENTS} archivos adjuntos.`);
+  }
+
+  const uploaded: BudgetAttachment[] = [];
+  for (const file of newFiles) {
+    if (file.size > MAX_ATTACHMENT_SIZE) {
+      throw new Error(`"${file.name}" supera el tamaño máximo de 10MB.`);
+    }
+    if (!ALLOWED_ATTACHMENT_TYPES.has(file.type)) {
+      throw new Error(`"${file.name}" no es un tipo de archivo permitido.`);
+    }
+    const key = nanoid(24);
+    await uploadAttachment(key, await file.arrayBuffer(), file.type);
+    uploaded.push({ id: nanoid(8), name: file.name, contentType: file.type, size: file.size, key });
+  }
+
+  await Promise.all(removed.map((a) => deleteAttachment(a.key).catch(() => {})));
+
+  return [...kept, ...uploaded];
+}
+
 async function requireSession() {
   const session = await getSession();
   if (!session) redirect("/login");
@@ -114,6 +169,8 @@ export async function createBudget(formData: FormData) {
     }
   }
 
+  const attachments = await resolveAttachments(formData, []);
+
   const [created] = await db
     .insert(budgets)
     .values({
@@ -132,6 +189,7 @@ export async function createBudget(formData: FormData) {
       paymentLink: data.paymentLink,
       validityDays: data.validityDays,
       items: data.items as BudgetItem[],
+      attachments,
     })
     .returning({ id: budgets.id });
 
@@ -139,8 +197,9 @@ export async function createBudget(formData: FormData) {
 }
 
 export async function updateBudget(id: string, formData: FormData) {
-  await requireOwnedBudget(id);
+  const { budget } = await requireOwnedBudget(id);
   const data = parseBudgetForm(formData);
+  const attachments = await resolveAttachments(formData, budget.attachments);
 
   await db
     .update(budgets)
@@ -157,6 +216,7 @@ export async function updateBudget(id: string, formData: FormData) {
       paymentLink: data.paymentLink,
       validityDays: data.validityDays,
       items: data.items as BudgetItem[],
+      attachments,
       updatedAt: new Date(),
     })
     .where(eq(budgets.id, id));

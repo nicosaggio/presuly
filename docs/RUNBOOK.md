@@ -60,6 +60,7 @@ Todo corre sobre planes gratis (Neon, Resend, Netlify) — el primero en quedars
 - **PDF sin storage**: se regenera al vuelo en cada descarga (`/api/p/[token]/pdf`), no se guarda ningún archivo. Evita necesitar un servicio de storage — alineado con costo cero — a costa de recomputar el render en cada request (barato, es una operación de milisegundos).
 - **Tracking de apertura**: solo se registra "visto por primera vez" + contador total de vistas. El tracking granular por sección (cuánto tiempo en cada parte del presupuesto) es una feature de Fase 3, no de Fase 1.
 - **Sesión sin tabla en base**: el magic link y la cookie de sesión son tokens firmados (HMAC) con expiración, no hay tabla de sesiones ni de tokens de un solo uso. Más simple de operar, a cambio de que un magic link filtrado sigue siendo válido hasta que expira (15 min) en vez de invalidarse al primer uso.
+- **Adjuntos de presupuestos**: hasta 5 archivos por presupuesto, 10MB cada uno, tipos permitidos: imágenes (jpg/png/webp/gif), PDF, Word, Excel y CSV (`src/lib/storage/attachments.ts`). Se guardan en Netlify Blobs (store `budget-attachments`), no en la base — `budgets.attachments` solo tiene la metadata (nombre, tamaño, clave del blob). La descarga (`/api/attachments/[key]`) es tan pública como el resto del link del presupuesto: la clave es un nanoid no adivinable, sin chequeo de auth adicional, mismo modelo de seguridad que ya usa toda la app. Disponible en todos los planes, no solo Pro.
 
 ## Qué NO hacer sin autorización humana (ampliar en Fase 4)
 
