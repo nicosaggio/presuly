@@ -24,6 +24,18 @@
 5. Variables de Paddle (Fase 2): `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `NEXT_PUBLIC_PADDLE_ENV`, `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN`, `PADDLE_PRICE_PRO_MONTHLY`, `PADDLE_PRICE_PRO_ANNUAL` — ver `.env.example` para dónde sacar cada uno. Con solo la `PADDLE_API_KEY` ya se puede crear el producto y los precios por API (`paddle.products.create` / `paddle.prices.create`) y el webhook (`paddle.notificationSettings.create`, que devuelve el secret directo) sin tocar el dashboard.
 6. **Dominios aprobados en Paddle**: el checkout de Paddle.js solo abre desde dominios aprobados manualmente (Checkout → Checkout Settings → Approved Domains) — esto no se puede hacer por API, es una pantalla del dashboard. `localhost` no siempre lo acepta; para probar el checkout localmente puede hacer falta un túnel (ngrok) o probar directo contra el dominio de producción ya aprobado.
 
+### Pasar Paddle de Sandbox a Live
+
+El catálogo, precios y webhook de Live ya están creados por API (ver `.env.local`, comentado bajo "Paddle LIVE"). Falta, antes de activarlo en producción:
+
+1. **Client-side token Live**: Developer Tools → Authentication → Client-side tokens, con la cuenta en modo Live (no lo genera la API).
+2. **Verificación de cuenta**: datos del negocio + cuenta bancaria para payouts, en Business account → Payouts. Esto lo carga el usuario directo en Paddle, nunca por acá — son datos financieros reales.
+3. **Approved Domains** (modo Live, es una lista separada de la de Sandbox): Checkout → Checkout Settings → agregar `presuly.com.ar`.
+4. **Default payment link** (modo Live, también separado de Sandbox): mismo lugar, poner `https://presuly.com.ar/dashboard/billing`.
+5. **Solicitar aprobación de dominio**: Checkout → Request domain approval. A diferencia de Sandbox (que aprueba automático), en Live esto lo revisa Paddle — conviene mandarlo ni bien se activa Live para que corra en paralelo con la verificación.
+
+Recién cuando 1-5 estén listos tiene sentido cambiar las variables de entorno de producción (`PADDLE_API_KEY`, `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN`, `NEXT_PUBLIC_PADDLE_ENV=production`, `PADDLE_PRICE_PRO_MONTHLY`, `PADDLE_PRICE_PRO_ANNUAL`, `PADDLE_WEBHOOK_SECRET`) de los valores de Sandbox a los de Live — hacerlo antes rompe el checkout para cualquiera que esté probando en producción mientras tanto.
+
 ### Bloqueante conocido: "Unrecognized Git contributor" en Netlify
 
 Los pushes automáticos (CI) desde este entorno quedan bloqueados con `Build blocked: Unrecognized Git contributor` — el plan de Netlify exige aprobar manualmente commits de contribuidores no reconocidos antes de buildearlos. No es algo resoluble por API (lo intenté, `updateSite` con `untrusted_flow` no tuvo efecto). Hay que entrar a **Site configuration → Build & deploy** (o la pestaña **Deploys** del sitio) y aprobar/reintentar el deploy bloqueado, o agregar el email del commit como colaborador de confianza del team.
