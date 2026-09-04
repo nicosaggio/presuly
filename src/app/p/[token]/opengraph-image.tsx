@@ -29,18 +29,18 @@ export default async function Image({ params }: { params: Promise<{ token: strin
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 80,
-          background: "#fafafa",
+          background: "#FBFAF8",
           fontFamily: "sans-serif",
         }}
       >
-        <div style={{ display: "flex", fontSize: 28, fontWeight: 700, color: "#18181b" }}>
+        <div style={{ display: "flex", fontSize: 28, fontWeight: 700, color: "#0C6E63" }}>
           Presuly
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ display: "flex", fontSize: 56, fontWeight: 700, color: "#18181b" }}>
+          <div style={{ display: "flex", fontSize: 56, fontWeight: 700, color: "#101917" }}>
             {budget?.title ?? "Presupuesto"}
           </div>
-          <div style={{ display: "flex", fontSize: 32, color: "#71717a" }}>
+          <div style={{ display: "flex", fontSize: 32, color: "#5B6A67" }}>
             {budget
               ? `${isEn ? "For" : "Para"} ${budget.clientName}`
               : isEn
@@ -49,10 +49,10 @@ export default async function Image({ params }: { params: Promise<{ token: strin
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-          <div style={{ display: "flex", fontSize: 24, color: "#71717a" }}>
+          <div style={{ display: "flex", fontSize: 24, color: "#5B6A67" }}>
             {isEn ? "Total" : "Total"}
           </div>
-          <div style={{ display: "flex", fontSize: 48, fontWeight: 700, color: "#18181b" }}>
+          <div style={{ display: "flex", fontSize: 48, fontWeight: 700, color: "#0C6E63" }}>
             {budget ? formatCurrency(total, budget.currency, locale) : ""}
           </div>
         </div>

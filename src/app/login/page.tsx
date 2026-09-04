@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getDictionary } from "@/lib/i18n/server";
 import { getSession } from "@/lib/auth/session";
 import { LoginForm } from "@/components/login-form";
+import { Logo } from "@/components/logo";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default async function LoginPage(props: PageProps<"/login">) {
@@ -17,6 +18,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
     <div className="flex flex-1 items-center justify-center px-6 py-16">
       <Card className="w-full max-w-sm">
         <CardHeader>
+          <Logo size="md" className="mb-2" />
           <CardTitle>{dict.auth.loginTitle}</CardTitle>
           <CardDescription>{dict.auth.loginSubtitle}</CardDescription>
         </CardHeader>

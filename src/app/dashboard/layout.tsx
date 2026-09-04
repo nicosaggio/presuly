@@ -6,6 +6,7 @@ import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { effectivePlan } from "@/lib/plans";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { LogoutButton } from "@/components/logout-button";
+import { Logo } from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 
 export default async function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
@@ -29,8 +30,8 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
     <div className="flex flex-col flex-1">
       <header className="flex flex-wrap items-center justify-between gap-y-2 px-4 py-3 border-b sm:px-6 sm:py-4">
         <div className="flex items-center gap-4 sm:gap-6">
-          <Link href="/dashboard" className="font-semibold">
-            {dict.common.appName}
+          <Link href="/dashboard" aria-label={dict.common.appName}>
+            <Logo size="sm" />
           </Link>
           <Link
             href="/dashboard"

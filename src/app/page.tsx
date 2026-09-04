@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth/session";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { LinkButton } from "@/components/link-button";
 import { AttributionCapture } from "@/components/attribution-capture";
+import { Logo } from "@/components/logo";
 
 export default async function Home() {
   const [dict, locale, session] = await Promise.all([
@@ -19,7 +20,7 @@ export default async function Home() {
         <AttributionCapture />
       </Suspense>
       <header className="flex items-center justify-between px-6 py-4 border-b">
-        <span className="font-semibold">{dict.common.appName}</span>
+        <Logo size="sm" />
         <div className="flex items-center gap-4">
           <LocaleSwitcher current={locale} />
           <LinkButton

@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LogoMark } from "@/components/logo";
 
 const initialState: AcceptBudgetState = { ok: false };
 
@@ -243,11 +244,12 @@ export function PublicBudgetView({
       )}
 
       {showBranding && (
-        <footer className="pt-6 text-center">
+        <footer className="pt-6 flex justify-center">
           <Link
             href="/?utm_source=budget_footer"
-            className="text-xs text-muted-foreground hover:text-foreground"
+            className="inline-flex items-center gap-1.5 text-xs text-[var(--presuly-texto-3)] hover:text-foreground"
           >
+            <LogoMark size={16} />
             {dict.publicView.poweredBy}
           </Link>
         </footer>

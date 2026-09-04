@@ -1,0 +1,47 @@
+/* Presuly — tokens de marca
+   Tipografía: Poppins (Google Fonts). 700 para el logotipo y titulares, 400/500 para interfaz.
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"> */
+
+:root {
+  /* Marca */
+  --presuly-verde:            #0C6E63;
+  --presuly-verde-oscuro:     #0A5A51;
+  --presuly-verde-claro:      #E3F0ED;
+  --presuly-tinta:            #101917;
+
+  /* Neutros */
+  --presuly-papel:            #FBFAF8;
+  --presuly-superficie:       #FFFFFF;
+  --presuly-superficie-alt:   #F1F5F3;
+  --presuly-borde:            #E3E9E7;
+  --presuly-texto:            #101917;
+  --presuly-texto-2:          #5B6A67;
+  --presuly-texto-3:          #8A9794;
+
+  /* Estados del presupuesto */
+  --presuly-borrador:         #8A9794;
+  --presuly-enviado:          #1F6FB2;
+  --presuly-visto:            #C08A17;
+  --presuly-aceptado:         #0C6E63;
+  --presuly-vencido:          #B0402E;
+
+  /* Forma */
+  --presuly-radio-sm:         8px;
+  --presuly-radio-md:         14px;
+  --presuly-radio-lg:         22px;
+  --presuly-fuente:           Poppins, 'Segoe UI', system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --presuly-papel:          #0B1110;
+    --presuly-superficie:     #131C1A;
+    --presuly-superficie-alt: #1B2624;
+    --presuly-borde:          #26332F;
+    --presuly-texto:          #F1F5F3;
+    --presuly-texto-2:        #A3B2AE;
+    --presuly-texto-3:        #7C8A86;
+    --presuly-verde:          #2A9E8E;
+    --presuly-verde-claro:    #12332E;
+  }
+}
