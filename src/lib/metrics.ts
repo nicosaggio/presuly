@@ -124,3 +124,24 @@ export async function calculateOverviewStats(): Promise<OverviewStats> {
       proCount * PLAN_PRICES.pro.monthlyUSD + studioCount * PLAN_PRICES.studio.monthlyUSD,
   };
 }
+
+export type ChurnStats = { pastDueUsers: number; canceledUsers: number };
+
+/** Señales de churn para el reporte de operación. Son conteos actuales (foto de
+ * hoy), no una tasa en el tiempo: `users` no tiene `updatedAt`, y Paddle manda
+ * `nextBilledAt: null` al cancelar, así que no hay forma de saber desde cuándo
+ * está en ese estado con el schema actual. */
+export async function calculateChurnStats(): Promise<ChurnStats> {
+  const [[{ count: pastDueUsers }], [{ count: canceledUsers }]] = await Promise.all([
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(users)
+      .where(eq(users.planStatus, "past_due")),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(users)
+      .where(eq(users.planStatus, "canceled")),
+  ]);
+
+  return { pastDueUsers, canceledUsers };
+}

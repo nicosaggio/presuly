@@ -30,3 +30,15 @@ Implementado: cookie de atribución de 30 días (primer touch gana) que distingu
 **Definición de "usuarios activos" para k**: usuarios que publicaron al menos un presupuesto (no solo se registraron). Es una definición defendible pero no la única posible — documentada en `src/lib/metrics.ts` por si se quiere ajustar.
 
 **`/dashboard/metrics`**: gateado por `ADMIN_EMAIL` (chequeo simple por ahora, no hay sistema de roles). Es el "dashboard" que pide el criterio de cierre de Fase 3, no el reporte completo de operación (`GET /api/admin/report`), que es de Fase 4.
+
+## 2026-09-04 — Fase 4: rate limiting reforzado y endpoint de reporte
+
+**Rate limiting del magic link**: el cooldown de 30s por cookie (Fase 1) es fácil de esquivar (incógnito, borrar cookies, otro navegador). Se agregó un límite server-side en `src/lib/auth/rate-limit.ts`, guardado en la tabla nueva `magic_link_requests`: 5 pedidos por email por hora, 15 por IP por hora. Los dos límites conviven — la cookie evita el viaje a la base en el caso normal (un usuario pidiendo su propio link), el server-side es el que realmente importa contra abuso distribuido.
+
+**`GET /api/admin/report`**: implementado con dos formas de acceso — token (`Authorization: Bearer <ADMIN_REPORT_TOKEN>`, para que un agente/cron lo llame sin sesión) o la sesión de `ADMIN_EMAIL` (para abrirlo a mano). Devuelve usuarios, presupuestos, MRR estimado, churn (`past_due`/`canceled`, conteo actual — no hay forma de medir una tasa en el tiempo con el schema de hoy: `users` no tiene `updatedAt` y Paddle manda `nextBilledAt: null` al cancelar), `k` viral y uso del cupo de Resend. Errores/anomalías de Sentry quedan pendientes porque Sentry todavía no está configurado en el proyecto.
+
+## 2026-09-04 — Identidad de marca aplicada (Poppins, verde `#0C6E63`, logo)
+
+El usuario pasó un paquete (`marca/`) con el logo definitivo (isotipo P+check), paleta de colores y tipografía (Poppins) que hasta ahora no estaban cableados — la app corría con el tema gris por defecto de shadcn y sin favicon propio. Se copiaron los archivos a `public/brand/` (+ `favicon.ico`, `apple-touch-icon-180.png` y `presuly-favicon.svg` en la raíz de `public/`), se importaron los tokens (`src/styles/presuly-tokens.css`) en `globals.css` mapeándolos a las variables semánticas de shadcn (`--primary`, `--background`, etc. — no hay `tailwind.config.js`, Tailwind v4 es CSS-first), se cambió la fuente de Geist a Poppins en `layout.tsx`, y se agregó el logo (`src/components/logo.tsx`) al header del dashboard, la landing, el login y el pie de la vista pública del presupuesto (el isotipo de 16px que pide `docs/MARCA.md`). Los colores de estado del presupuesto (`BudgetStatusBadge`) pasaron a usar los hex exactos de la marca en vez de los variants genéricos de shadcn. El PDF (`budget-pdf.tsx`) y las imágenes OpenGraph también se actualizaron para usar la paleta y el logo a una tinta.
+
+El manual completo de marca queda en `docs/MARCA.md` — no rediseñar ni inventar variantes sin consultarlo primero.

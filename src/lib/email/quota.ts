@@ -4,7 +4,7 @@ import { emailSends, systemState } from "@/lib/db/schema";
 import { sendRaw } from "./resend";
 
 /** Límite del plan free de Resend. Si esto cambia (plan pago), subir o sacar el chequeo. */
-const DAILY_LIMIT = 100;
+export const DAILY_LIMIT = 100;
 const ALERT_THRESHOLD = 80;
 const ALERT_COOLDOWN_MS = 20 * 60 * 60 * 1000;
 const ALERT_KEY = "resend_daily_quota_alert";
@@ -51,4 +51,15 @@ export async function checkEmailQuota() {
       target: systemState.key,
       set: { value: new Date().toISOString(), updatedAt: new Date() },
     });
+}
+
+/** Para el reporte de operación (GET /api/admin/report) — cuánto del cupo diario
+ * de Resend se usó en las últimas 24hs, sin registrar un envío nuevo. */
+export async function getEmailQuotaSnapshot() {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(emailSends)
+    .where(gte(emailSends.createdAt, since));
+  return { sentLast24h: count, dailyLimit: DAILY_LIMIT };
 }

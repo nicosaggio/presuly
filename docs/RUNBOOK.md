@@ -1,7 +1,7 @@
 # RUNBOOK.md
 
-> Este documento se expande en Fase 4 (capa de operación: endpoint de reporte, jobs,
-> alertas). Por ahora cubre lo necesario para levantar y desplegar el bucle central de Fase 1.
+> Fase 4 (capa de operación) en curso: el endpoint de reporte y el rate limiting
+> reforzado ya están. Faltan jobs programados y alertas — ver ESTADO.md.
 
 ## Setup local
 
@@ -12,6 +12,7 @@
    - `RESEND_API_KEY`: de [resend.com/api-keys](https://resend.com/api-keys) (plan gratis)
    - `EMAIL_FROM`: mientras no verifiques un dominio propio en Resend, usá `Presuly <onboarding@resend.dev>` — Resend solo entrega ese remitente al email de tu propia cuenta, así que para probar el flujo completo con un cliente real hace falta verificar `presuly.com.ar` en Resend (registros DNS, es gratis).
    - `APP_URL`: `http://localhost:3000` en local
+   - `ADMIN_REPORT_TOKEN` (opcional): para que un agente/cron llame `GET /api/admin/report` sin sesión de navegador. Generá uno con `openssl rand -base64 32`.
 3. Corré las migraciones contra tu Neon: `npm run db:push` (usa el schema directo, sin generar SQL — más rápido para desarrollo. Para producción preferí `npm run db:generate` + `npm run db:migrate`, que sí versiona el SQL en `/drizzle`).
 4. `npm run dev`
 
@@ -55,16 +56,49 @@ Todo corre sobre planes gratis (Neon, Resend, Netlify) — el primero en quedars
 
 ## Simplificaciones deliberadas de Fase 1 (no son bugs)
 
-- **Rate limiting del magic link**: cooldown de 30s por cookie de navegador, nada más. Es un piso, no protección real contra abuso distribuido. Reforzar en Fase 4 si el reporte diario muestra picos anómalos de registro.
+- **Rate limiting del magic link**: cooldown de 30s por cookie de navegador **más** un límite server-side por email (5/hora) y por IP (15/hora) guardado en la tabla `magic_link_requests` (`src/lib/auth/rate-limit.ts`, Fase 4). El cooldown de cookie sigue siendo el primer filtro (evita el viaje a la base en el caso normal); el límite server-side es el que realmente frena abuso distribuido, porque no depende de que el atacante conserve cookies.
 - **Límite de 3 presupuestos del plan gratis**: aplicado desde Fase 2 (`src/lib/plans.ts`). "Activo" = `draft`/`sent`/`viewed`; un presupuesto aceptado o vencido libera el cupo.
 - **PDF sin storage**: se regenera al vuelo en cada descarga (`/api/p/[token]/pdf`), no se guarda ningún archivo. Evita necesitar un servicio de storage — alineado con costo cero — a costa de recomputar el render en cada request (barato, es una operación de milisegundos).
 - **Tracking de apertura**: solo se registra "visto por primera vez" + contador total de vistas. El tracking granular por sección (cuánto tiempo en cada parte del presupuesto) es una feature de Fase 3, no de Fase 1.
 - **Sesión sin tabla en base**: el magic link y la cookie de sesión son tokens firmados (HMAC) con expiración, no hay tabla de sesiones ni de tokens de un solo uso. Más simple de operar, a cambio de que un magic link filtrado sigue siendo válido hasta que expira (15 min) en vez de invalidarse al primer uso.
 - **Adjuntos de presupuestos**: hasta 5 archivos por presupuesto, 10MB cada uno, tipos permitidos: imágenes (jpg/png/webp/gif), PDF, Word, Excel y CSV (`src/lib/storage/attachments.ts`). Se guardan en Netlify Blobs (store `budget-attachments`), no en la base — `budgets.attachments` solo tiene la metadata (nombre, tamaño, clave del blob). La descarga (`/api/attachments/[key]`) es tan pública como el resto del link del presupuesto: la clave es un nanoid no adivinable, sin chequeo de auth adicional, mismo modelo de seguridad que ya usa toda la app. Disponible en todos los planes, no solo Pro.
 
-## Qué NO hacer sin autorización humana (ampliar en Fase 4)
+## Reporte de operación (Fase 4)
 
-- No tocar precios del plan gratis/Pro sin decisión del usuario.
+**`GET /api/admin/report`** (`src/app/api/admin/report/route.ts`): JSON con usuarios
+(total, nuevos últimos 7 días, suscriptos, breakdown por plan), presupuestos
+(total, activos, aceptados, tasa de aceptación), MRR estimado, señales de churn
+(usuarios `past_due`/`canceled` — es una foto de hoy, no una tasa: `users` no
+tiene `updatedAt`), coeficiente viral `k` y uso del cupo diario de Resend.
+
+Dos formas de acceso, para no depender de una sesión de navegador:
+- **Token**: `Authorization: Bearer <ADMIN_REPORT_TOKEN>` — para que un agente o
+  cron lo llame solo. Generar con `openssl rand -base64 32` y cargarlo en
+  `ADMIN_REPORT_TOKEN` (local y Netlify). Si no está seteada, esta vía queda
+  deshabilitada (no hay bypass).
+- **Sesión**: si quien pide el reporte tiene una cookie de sesión válida con
+  `email === ADMIN_EMAIL`, también entra — para abrirlo a mano desde el navegador.
+
+**Falta todavía** (no implementado en esta pasada): errores de las últimas 24hs
+y "5 anomalías más relevantes con severidad" — depende de tener Sentry
+configurado, que no está en el proyecto todavía.
+
+## Identidad de marca
+
+`public/brand/` tiene el logo, isotipo, favicons e íconos oficiales; los tokens
+de color/tipografía/radios están en `src/styles/presuly-tokens.css` (importado
+desde `globals.css`, mapeado a las variables semánticas de shadcn — no hay
+`tailwind.config.js`, Tailwind v4 es CSS-first). `docs/MARCA.md` tiene las
+reglas de uso completas (aire mínimo, tamaños, qué no se hace). **No inventar
+colores, logos ni tipografías nuevas** — está todo resuelto ahí.
+
+## Qué NO hacer sin autorización humana
+
+- No tocar precios del plan gratis/Pro/Estudio sin decisión del usuario.
 - No mandar emails masivos fuera del flujo transaccional (magic link, notificación de visto, notificación de aceptación).
 - No borrar datos de usuarios o presupuestos salvo pedido explícito de borrado de cuenta.
 - No responder reclamos legales o pedidos de reembolso — escalar al usuario.
+- No cambiar la identidad de marca (logo, colores, tipografía) sin pedido explícito — ver `docs/MARCA.md`.
+- No agregar un chatbot de IA, CRM, facturación ni gestión de proyectos "porque queda bien" — no es la tesis del producto (ver `docs/PLAN.md`).
+- No generar contenido SEO automatizado en masa (la galería de `/templates` son plantillas reales, no relleno).
+- No aflojar el rate limiting del magic link ni el de creación de cuentas sin medir antes el impacto en abuso real.

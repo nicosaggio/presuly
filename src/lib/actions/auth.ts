@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createMagicLinkToken } from "@/lib/auth/magic-link";
+import { checkMagicLinkRateLimit } from "@/lib/auth/rate-limit";
 import { destroySession } from "@/lib/auth/session";
 import { sendEmail } from "@/lib/email/resend";
 import { magicLinkEmail } from "@/lib/email/templates";
@@ -17,7 +18,7 @@ const COOLDOWN_SECONDS = 30;
 
 export type RequestMagicLinkState = {
   ok: boolean;
-  error?: "invalid_email" | "too_soon" | "unknown";
+  error?: "invalid_email" | "too_soon" | "too_many" | "unknown";
 };
 
 export async function requestMagicLink(
@@ -36,6 +37,16 @@ export async function requestMagicLink(
   }
 
   const locale = await getLocale();
+  const h = await headers();
+  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+
+  const rateLimit = await checkMagicLinkRateLimit(email, ip).catch((err) => {
+    console.error("checkMagicLinkRateLimit failed", err);
+    return { limited: false as const };
+  });
+  if (rateLimit.limited) {
+    return { ok: false, error: "too_many" };
+  }
 
   // Solo rutas relativas propias (evita open-redirect a un dominio externo).
   const rawNext = formData.get("next");
@@ -46,7 +57,6 @@ export async function requestMagicLink(
 
   try {
     const token = createMagicLinkToken(email, locale, next);
-    const h = await headers();
     const origin = h.get("origin") ?? process.env.APP_URL ?? "http://localhost:3000";
     const url = `${origin}/api/auth/verify?token=${encodeURIComponent(token)}`;
 
