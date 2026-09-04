@@ -1,0 +1,113 @@
+import type { Metadata } from "next";
+import { getDictionary, getLocale } from "@/lib/i18n/server";
+import { getSession } from "@/lib/auth/session";
+import { getUserById } from "@/lib/db/queries";
+import { getPriceIds } from "@/lib/paddle/server";
+import { effectivePlan, PLAN_PRICES } from "@/lib/plans";
+import { formatCurrency } from "@/lib/format";
+import { LinkButton } from "@/components/link-button";
+import { PaddleCheckoutButton } from "@/components/paddle-checkout-button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Precios | Presuly",
+  description: "Planes y precios de Presuly: gratis para siempre, o Pro por USD 9/mes.",
+};
+
+export default async function PricingPage() {
+  const session = await getSession();
+  const [dict, locale, user] = await Promise.all([
+    getDictionary(),
+    getLocale(),
+    session ? getUserById(session.userId) : Promise.resolve(null),
+  ]);
+
+  const priceIds = getPriceIds();
+  const paddleConfigured = Boolean(process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN);
+  const plan = user ? effectivePlan(user) : "free";
+
+  return (
+    <div className="mx-auto max-w-3xl px-6 py-16 space-y-10">
+      <header className="space-y-2 text-center">
+        <h1 className="text-3xl font-semibold">{dict.billing.title}</h1>
+        <p className="text-muted-foreground">{dict.landing.freeNote}</p>
+      </header>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card className={plan === "free" ? "border-foreground" : ""}>
+          <CardHeader>
+            <CardTitle>{dict.billing.free}</CardTitle>
+            <CardDescription>{dict.billing.freeDescription}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-2xl font-semibold">{formatCurrency(0, "USD", locale)}</p>
+            {!user && (
+              <LinkButton href="/login" size="sm" className="w-full">
+                {dict.landing.cta}
+              </LinkButton>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className={plan === "pro" ? "border-foreground" : ""}>
+          <CardHeader>
+            <CardTitle>{dict.billing.pro}</CardTitle>
+            <CardDescription>{dict.billing.proDescription}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div>
+              <p className="text-2xl font-semibold">
+                {formatCurrency(PLAN_PRICES.pro.monthlyUSD, "USD", locale)}
+                {dict.billing.perMonth}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {formatCurrency(PLAN_PRICES.pro.annualUSD, "USD", locale)}
+                {dict.billing.perYear} ({dict.billing.annual})
+              </p>
+            </div>
+            {plan === "pro" ? (
+              <p className="text-sm font-medium">{dict.dashboard.planBadgePro} ✓</p>
+            ) : user && paddleConfigured ? (
+              <div className="flex flex-col gap-2">
+                <PaddleCheckoutButton
+                  priceId={priceIds.proMonthly}
+                  userId={user.id}
+                  email={user.email}
+                  activatingLabel={dict.billing.activating}
+                >
+                  {dict.billing.monthly}
+                </PaddleCheckoutButton>
+                <PaddleCheckoutButton
+                  priceId={priceIds.proAnnual}
+                  userId={user.id}
+                  email={user.email}
+                  activatingLabel={dict.billing.activating}
+                  variant="outline"
+                >
+                  {dict.billing.annual}
+                </PaddleCheckoutButton>
+              </div>
+            ) : (
+              <LinkButton href="/login?next=%2Fpricing" size="sm" className="w-full">
+                {dict.billing.upgradeToPro}
+              </LinkButton>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className={plan === "studio" ? "border-foreground" : ""}>
+          <CardHeader>
+            <CardTitle>{dict.billing.studio}</CardTitle>
+            <CardDescription>{dict.billing.studioDescription}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold">
+              {formatCurrency(PLAN_PRICES.studio.monthlyUSD, "USD", locale)}
+              {dict.billing.perMonth}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

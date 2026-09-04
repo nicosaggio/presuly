@@ -15,6 +15,7 @@ export const en: Dictionary = {
     privacy: "Privacy",
     refunds: "Refunds",
     templates: "Templates",
+    pricing: "Pricing",
     contact: "hola@presuly.com.ar",
     linkCopied: "Link copied",
     logout: "Log out",

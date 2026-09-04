@@ -51,6 +51,9 @@ export default async function Home() {
         <a href="mailto:hola@presuly.com.ar" className="hover:text-foreground">
           {dict.common.contact}
         </a>
+        <Link href="/pricing" className="hover:text-foreground">
+          {dict.common.pricing}
+        </Link>
         <Link href="/templates" className="hover:text-foreground">
           {dict.common.templates}
         </Link>
