@@ -1,11 +1,9 @@
-import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getUserBudgets } from "@/lib/db/queries";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
-import { formatCurrency } from "@/lib/format";
 import { LinkButton } from "@/components/link-button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BudgetStatusBadge } from "@/components/budget-status-badge";
+import { BudgetsTable } from "@/components/budgets-table";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -14,6 +12,19 @@ export default async function DashboardPage() {
     getLocale(),
     getUserBudgets(session!.userId),
   ]);
+
+  const rows = budgetList.map((budget) => ({
+    id: budget.id,
+    title: budget.title,
+    clientName: budget.clientName,
+    kind: budget.kind,
+    status: budget.status,
+    currency: budget.currency,
+    updatedAt: budget.updatedAt,
+    total: budget.items
+      .filter((it) => !it.optional || it.selected)
+      .reduce((sum, it) => sum + it.price, 0),
+  }));
 
   return (
     <div className="space-y-6">
@@ -29,28 +40,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {budgetList.map((budget) => {
-            const total = budget.items
-              .filter((it) => !it.optional || it.selected)
-              .reduce((sum, it) => sum + it.price, 0);
-            return (
-              <Link key={budget.id} href={`/dashboard/${budget.id}`}>
-                <Card className="transition-colors hover:bg-accent/50">
-                  <CardContent className="flex items-center justify-between gap-4 py-4">
-                    <div className="min-w-0">
-                      <p className="font-medium truncate">{budget.title}</p>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {budget.clientName} · {formatCurrency(total, budget.currency, locale)}
-                      </p>
-                    </div>
-                    <BudgetStatusBadge status={budget.status} dict={dict} />
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
+        <BudgetsTable budgets={rows} dict={dict} locale={locale} />
       )}
     </div>
   );
