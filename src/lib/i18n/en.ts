@@ -31,6 +31,27 @@ export const en: Dictionary = {
     pricingTeaserBody:
       "Pro gives you unlimited proposals, no Presuly badge, and automatic reminders. From USD 9/mo.",
     pricingTeaserCta: "See plans and pricing",
+    howItWorksTitle: "How it works",
+    howItWorksSubtitle:
+      "No more lost PDFs in a chat thread or a hand-built spreadsheet. From idea to signed proposal, in one link.",
+    howItWorksSteps: [
+      {
+        title: "Build it in minutes",
+        body: "Add your line items, scope, and conditions. No odd templates — a simple form, ready to send.",
+      },
+      {
+        title: "Send it as a link",
+        body: "A link that opens perfectly on a phone, over WhatsApp or email. Your client doesn't download anything.",
+      },
+      {
+        title: "Know the moment they open it",
+        body: "We notify you as soon as your client opens the proposal. No more \"did you see it?\" with no answer.",
+      },
+      {
+        title: "They accept with one tap",
+        body: "A simple digital signature, timestamped. You and your client both get the final PDF instantly.",
+      },
+    ],
   },
   auth: {
     loginTitle: "Log in to your account",

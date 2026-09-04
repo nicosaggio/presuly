@@ -47,6 +47,26 @@ export default async function Home() {
         <p className="mt-4 text-sm text-muted-foreground">{dict.landing.freeNote}</p>
       </main>
 
+      <section className="border-t px-6 py-16">
+        <div className="mx-auto max-w-4xl space-y-10">
+          <div className="mx-auto max-w-xl space-y-2 text-center">
+            <h2 className="text-2xl sm:text-3xl font-semibold">{dict.landing.howItWorksTitle}</h2>
+            <p className="text-muted-foreground text-balance">{dict.landing.howItWorksSubtitle}</p>
+          </div>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {dict.landing.howItWorksSteps.map((step, i) => (
+              <div key={step.title} className="space-y-2 text-left">
+                <div className="flex size-8 items-center justify-center rounded-full bg-foreground text-sm font-semibold text-background">
+                  {i + 1}
+                </div>
+                <h3 className="font-medium">{step.title}</h3>
+                <p className="text-sm text-muted-foreground text-pretty">{step.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="border-t px-6 py-14">
         <div className="mx-auto max-w-lg text-center space-y-4">
           <h2 className="text-xl font-semibold">{dict.landing.pricingTeaserTitle}</h2>

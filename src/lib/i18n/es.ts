@@ -29,6 +29,27 @@ export const es = {
     pricingTeaserBody:
       "Con el plan Pro tenés presupuestos ilimitados, sin la marca de Presuly y recordatorios automáticos. Desde USD 9/mes.",
     pricingTeaserCta: "Ver planes y precios",
+    howItWorksTitle: "¿Cómo funciona?",
+    howItWorksSubtitle:
+      "Nada de PDF perdido en el chat ni Excel armado a mano. De la idea al presupuesto firmado, en un link.",
+    howItWorksSteps: [
+      {
+        title: "Armalo en minutos",
+        body: "Cargá los ítems, el alcance y las condiciones. Sin plantillas raras — un formulario simple, listo para mandar.",
+      },
+      {
+        title: "Mandalo como link",
+        body: "Un link que se abre perfecto en el celular, por WhatsApp o email. Tu cliente no tiene que descargar nada.",
+      },
+      {
+        title: "Enterate cuando lo ve",
+        body: "Te avisamos apenas tu cliente abre el presupuesto. Se terminó el \"¿lo viste?\" sin respuesta.",
+      },
+      {
+        title: "Lo acepta con un toque",
+        body: "Firma digital simple, con sello de fecha y hora. Vos y tu cliente reciben el PDF final al instante.",
+      },
+    ],
   },
   auth: {
     loginTitle: "Entrá a tu cuenta",
