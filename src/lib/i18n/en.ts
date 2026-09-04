@@ -14,6 +14,7 @@ export const en: Dictionary = {
     terms: "Terms",
     privacy: "Privacy",
     refunds: "Refunds",
+    templates: "Templates",
     linkCopied: "Link copied",
     logout: "Log out",
   },
@@ -57,6 +58,14 @@ export const en: Dictionary = {
     planBadgePro: "Pro",
     planBadgeStudio: "Studio",
   },
+  templatesGallery: {
+    title: "Proposal templates",
+    subtitle: "Pick a template for your field and start with half the work done.",
+    useTemplate: "Use this template",
+    backToGallery: "See all templates",
+    itemsTitle: "Sample details",
+    conditionsTitle: "Suggested conditions",
+  },
   billing: {
     title: "Your plan",
     currentPlan: "Current plan",
@@ -81,6 +90,9 @@ export const en: Dictionary = {
     currentlyOnPlan: "You're on the {plan} plan.",
     pastDue: "Your last payment failed. Update your payment method to keep your Pro plan.",
     canceled: "Your subscription is canceled. You'll return to the free plan at the end of the paid period.",
+    referralTitle: "Invite people, get a month of Pro",
+    referralDescription:
+      "When someone signs up with your link and sends their first proposal, you both get a free month of Pro.",
   },
   editor: {
     newTitle: "New proposal",

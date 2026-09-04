@@ -37,8 +37,15 @@ export async function requestMagicLink(
 
   const locale = await getLocale();
 
+  // Solo rutas relativas propias (evita open-redirect a un dominio externo).
+  const rawNext = formData.get("next");
+  const next =
+    typeof rawNext === "string" && rawNext.startsWith("/") && !rawNext.startsWith("//")
+      ? rawNext
+      : undefined;
+
   try {
-    const token = createMagicLinkToken(email, locale);
+    const token = createMagicLinkToken(email, locale, next);
     const h = await headers();
     const origin = h.get("origin") ?? process.env.APP_URL ?? "http://localhost:3000";
     const url = `${origin}/api/auth/verify?token=${encodeURIComponent(token)}`;

@@ -20,3 +20,13 @@ Se integró `@paddle/paddle-node-sdk` + `@paddle/paddle-js` (Paddle Billing, la 
 
 ## 2026-09-04 — Fase 2 cerrada: checkout de Paddle validado de punta a punta
 Pago de prueba real completado en producción (presuly.com.ar, cuenta Paddle sandbox): checkout abrió con precio/usuario correctos, el webhook `subscription.created` activó el plan Pro automáticamente (sin intervención manual) y quedó guardado `paddle_customer_id`/`paddle_subscription_id`/`plan_renews_at` en la base. Dos configuraciones de cuenta de Paddle que no son API-configurables y hubo que setear a mano en el dashboard: **Approved Domains** (localhost no siempre es aceptado; hubo que aprobar `presuly.netlify.app`/`presuly.com.ar`) y **Default payment link** (sin esto, el checkout falla con `transaction_default_checkout_url_not_set`). Quedan documentadas en RUNBOOK.md para cuando se pase a producción real.
+
+## 2026-09-04 — Precio de Pro bajado a USD 9/mes y USD 75/año
+El usuario pidió bajar el precio de Fase 0 (USD 12/mes, USD 108/año) a **USD 9/mes y USD 75/año**. Se crearon precios nuevos en Paddle en vez de modificar los existentes (todavía en Sandbox, sin clientes reales pagando, pero es la práctica correcta igual: así el día que haya suscriptores reales, un cambio de precio no les modifica lo que ya están pagando — grandfathering, tal como preveía la Sección 4.3 del plan original). `PLAN_PRICES` en `src/lib/plans.ts` y las variables `PADDLE_PRICE_PRO_MONTHLY`/`PADDLE_PRICE_PRO_ANNUAL` actualizadas.
+
+## 2026-09-04 — Fase 3 (parte 1): atribución, referidos, plantillas, OpenGraph
+Implementado: cookie de atribución de 30 días (primer touch gana) que distingue `shared_link` (footer de presupuesto), `referral` (link con `?ref=`) y `template_gallery`; sistema de referidos con recompensa de dos lados (1 mes de Pro c/u) que se otorga cuando el referido publica su primer presupuesto, no en el registro (para evitar premiar cuentas que nunca llegan a usar el producto); galería pública de 6 plantillas por rubro en `/templates` (indexable, a diferencia de `/p/[token]`); imágenes OpenGraph dinámicas para presupuestos y landing con `next/og`.
+
+**Definición de "usuarios activos" para k**: usuarios que publicaron al menos un presupuesto (no solo se registraron). Es una definición defendible pero no la única posible — documentada en `src/lib/metrics.ts` por si se quiere ajustar.
+
+**`/dashboard/metrics`**: gateado por `ADMIN_EMAIL` (chequeo simple por ahora, no hay sistema de roles). Es el "dashboard" que pide el criterio de cierre de Fase 3, no el reporte completo de operación (`GET /api/admin/report`), que es de Fase 4.

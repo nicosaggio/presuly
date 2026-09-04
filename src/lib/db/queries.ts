@@ -1,6 +1,7 @@
 import { eq, desc } from "drizzle-orm";
+import { nanoid } from "nanoid";
 import { db } from "./index";
-import { budgets, acceptances, users } from "./schema";
+import { budgets, acceptances, users, type signupSourceEnum } from "./schema";
 
 export async function getBudgetByToken(token: string) {
   const [budget] = await db
@@ -38,16 +39,36 @@ export async function getUserById(id: string) {
   return user ?? null;
 }
 
+export async function getUserByReferralCode(code: string) {
+  const [user] = await db.select().from(users).where(eq(users.referralCode, code)).limit(1);
+  return user ?? null;
+}
+
+type SignupSource = (typeof signupSourceEnum.enumValues)[number];
+
 /**
  * Upsert atómico: dos verificaciones de magic link casi simultáneas (común porque
  * Gmail/Outlook "pre-visitan" los links por seguridad) no deben pisarse en una
  * carrera select-then-insert. ON CONFLICT DO UPDATE con un no-op garantiza que
  * RETURNING siempre traiga la fila, gane quien gane la carrera.
+ *
+ * La atribución (signupSource/referredByUserId) solo se aplica si el INSERT
+ * gana la carrera (usuario nuevo) — en un login existente el UPDATE no la toca.
  */
-export async function upsertUserByEmail(email: string, locale: string) {
+export async function upsertUserByEmail(
+  email: string,
+  locale: string,
+  attribution?: { signupSource?: SignupSource; referredByUserId?: string }
+) {
   const [user] = await db
     .insert(users)
-    .values({ email, locale })
+    .values({
+      email,
+      locale,
+      referralCode: nanoid(8),
+      signupSource: attribution?.signupSource ?? "direct",
+      referredByUserId: attribution?.referredByUserId ?? null,
+    })
     .onConflictDoUpdate({
       target: users.email,
       set: { email },

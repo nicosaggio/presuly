@@ -11,6 +11,7 @@ import { budgets, acceptances, users, type BudgetItem } from "@/lib/db/schema";
 import { getSession } from "@/lib/auth/session";
 import { getLocale } from "@/lib/i18n/server";
 import { activeBudgetLimit, ACTIVE_BUDGET_STATUSES, hasBranding } from "@/lib/plans";
+import { grantReferralReward } from "@/lib/actions/referrals";
 import { renderBudgetPdf } from "@/lib/pdf/budget-pdf";
 import { sendEmail } from "@/lib/email/resend";
 import {
@@ -156,7 +157,7 @@ export async function updateBudget(id: string, formData: FormData) {
 }
 
 export async function publishBudget(id: string) {
-  const { budget } = await requireOwnedBudget(id);
+  const { budget, session } = await requireOwnedBudget(id);
   if (budget.status !== "draft") {
     revalidatePath(`/dashboard/${id}`);
     return;
@@ -171,6 +172,21 @@ export async function publishBudget(id: string) {
     .update(budgets)
     .set({ status: "sent", publishedAt: now, validUntil, updatedAt: now })
     .where(eq(budgets.id, id));
+
+  const [owner] = await db
+    .select({
+      referredByUserId: users.referredByUserId,
+      referralRewardGranted: users.referralRewardGranted,
+    })
+    .from(users)
+    .where(eq(users.id, session.userId))
+    .limit(1);
+
+  if (owner?.referredByUserId && !owner.referralRewardGranted) {
+    await grantReferralReward(session.userId, owner.referredByUserId).catch((err) =>
+      console.error("grantReferralReward failed", err)
+    );
+  }
 
   revalidatePath(`/dashboard/${id}`);
 }

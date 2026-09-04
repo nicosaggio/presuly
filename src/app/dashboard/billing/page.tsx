@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { getSession } from "@/lib/auth/session";
 import { getUserById } from "@/lib/db/queries";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
@@ -5,16 +6,18 @@ import { getPriceIds } from "@/lib/paddle/server";
 import { effectivePlan, PLAN_PRICES } from "@/lib/plans";
 import { openBillingPortal } from "@/lib/actions/billing";
 import { PaddleCheckoutButton } from "@/components/paddle-checkout-button";
+import { ReferralCard } from "@/components/referral-card";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/format";
 
 export default async function BillingPage(props: PageProps<"/dashboard/billing">) {
   const session = await getSession();
-  const [dict, locale, user] = await Promise.all([
+  const [dict, locale, user, h] = await Promise.all([
     getDictionary(),
     getLocale(),
     getUserById(session!.userId),
+    headers(),
   ]);
   const searchParams = await props.searchParams;
   const noSubscriptionError = searchParams?.error === "no_subscription";
@@ -22,6 +25,8 @@ export default async function BillingPage(props: PageProps<"/dashboard/billing">
   const plan = effectivePlan(user!);
   const priceIds = getPriceIds();
   const paddleConfigured = Boolean(process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN);
+  const origin = h.get("origin") ?? process.env.APP_URL ?? "http://localhost:3000";
+  const referralUrl = `${origin}/?ref=${user!.referralCode}`;
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -110,6 +115,8 @@ export default async function BillingPage(props: PageProps<"/dashboard/billing">
           )}
         </Card>
       </div>
+
+      <ReferralCard dict={dict} locale={locale} referralUrl={referralUrl} />
     </div>
   );
 }

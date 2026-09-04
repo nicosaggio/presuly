@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { getSession } from "@/lib/auth/session";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { LinkButton } from "@/components/link-button";
+import { AttributionCapture } from "@/components/attribution-capture";
 
 export default async function Home() {
   const [dict, locale, session] = await Promise.all([
@@ -13,6 +15,9 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col flex-1">
+      <Suspense fallback={null}>
+        <AttributionCapture />
+      </Suspense>
       <header className="flex items-center justify-between px-6 py-4 border-b">
         <span className="font-semibold">{dict.common.appName}</span>
         <div className="flex items-center gap-4">
@@ -43,6 +48,9 @@ export default async function Home() {
       </main>
 
       <footer className="flex items-center justify-center gap-4 px-6 py-6 text-xs text-muted-foreground border-t">
+        <Link href="/templates" className="hover:text-foreground">
+          {dict.common.templates}
+        </Link>
         <Link href="/terms" className="hover:text-foreground">
           {dict.common.terms}
         </Link>

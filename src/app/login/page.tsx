@@ -11,6 +11,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
   const dict = await getDictionary();
   const searchParams = await props.searchParams;
   const hasLinkError = searchParams?.error === "invalid_link";
+  const next = typeof searchParams?.next === "string" ? searchParams.next : undefined;
 
   return (
     <div className="flex flex-1 items-center justify-center px-6 py-16">
@@ -23,7 +24,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
           {hasLinkError && (
             <p className="mb-4 text-sm text-destructive">{dict.auth.invalidLink}</p>
           )}
-          <LoginForm dict={dict} />
+          <LoginForm dict={dict} next={next} />
         </CardContent>
       </Card>
     </div>

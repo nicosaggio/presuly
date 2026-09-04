@@ -9,7 +9,7 @@ export const PLAN_LIMITS: Record<Plan, { maxActiveBudgets: number | null; brandi
 };
 
 export const PLAN_PRICES = {
-  pro: { monthlyUSD: 12, annualUSD: 108 },
+  pro: { monthlyUSD: 9, annualUSD: 75 },
   studio: { monthlyUSD: 29 },
 } as const;
 

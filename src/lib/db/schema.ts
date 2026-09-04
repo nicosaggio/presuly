@@ -5,6 +5,7 @@ import {
   uuid,
   jsonb,
   integer,
+  boolean,
   pgEnum,
 } from "drizzle-orm/pg-core";
 
@@ -25,6 +26,14 @@ export const planStatusEnum = pgEnum("plan_status", [
   "paused",
 ]);
 
+/** De dónde vino un registro nuevo. Base del coeficiente viral k (Fase 3). */
+export const signupSourceEnum = pgEnum("signup_source", [
+  "direct",
+  "shared_link",
+  "referral",
+  "template_gallery",
+]);
+
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: text("email").notNull().unique(),
@@ -35,6 +44,13 @@ export const users = pgTable("users", {
   paddleCustomerId: text("paddle_customer_id"),
   paddleSubscriptionId: text("paddle_subscription_id"),
   planRenewsAt: timestamp("plan_renews_at", { withTimezone: true }),
+  /** Código corto único para el link de referido de este usuario (ej: presuly.com.ar/?ref=XXXX). */
+  referralCode: text("referral_code").notNull().unique(),
+  /** Quién lo trajo, si vino por un link de referido. */
+  referredByUserId: uuid("referred_by_user_id"),
+  signupSource: signupSourceEnum("signup_source").notNull().default("direct"),
+  /** Si ya se otorgó el mes de Pro gratis por este referido (evita duplicar el premio). */
+  referralRewardGranted: boolean("referral_reward_granted").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

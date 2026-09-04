@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 
 const initialState: RequestMagicLinkState = { ok: false };
 
-export function LoginForm({ dict }: { dict: Dictionary }) {
+export function LoginForm({ dict, next }: { dict: Dictionary; next?: string }) {
   const [state, formAction, isPending] = useActionState(
     requestMagicLink,
     initialState
@@ -26,6 +26,7 @@ export function LoginForm({ dict }: { dict: Dictionary }) {
 
   return (
     <form action={formAction} className="space-y-4">
+      {next && <input type="hidden" name="next" value={next} />}
       <div className="space-y-2">
         <Label htmlFor="email">{dict.auth.emailLabel}</Label>
         <Input

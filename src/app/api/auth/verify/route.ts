@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMagicLinkToken } from "@/lib/auth/magic-link";
 import { createSession } from "@/lib/auth/session";
-import { upsertUserByEmail } from "@/lib/db/queries";
+import { upsertUserByEmail, getUserByReferralCode } from "@/lib/db/queries";
 import { setLocale } from "@/lib/actions/auth";
+import { ATTRIBUTION_COOKIE, type AttributionPayload } from "@/lib/attribution";
 
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
@@ -18,7 +19,22 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const user = await upsertUserByEmail(payload.email, payload.locale);
+    const attributionRaw = request.cookies.get(ATTRIBUTION_COOKIE)?.value;
+    let attribution: { signupSource?: AttributionPayload["source"]; referredByUserId?: string } = {};
+    if (attributionRaw) {
+      try {
+        const parsed = JSON.parse(attributionRaw) as AttributionPayload;
+        attribution.signupSource = parsed.source;
+        if (parsed.source === "referral" && parsed.ref) {
+          const referrer = await getUserByReferralCode(parsed.ref);
+          if (referrer) attribution.referredByUserId = referrer.id;
+        }
+      } catch {
+        attribution = {};
+      }
+    }
+
+    const user = await upsertUserByEmail(payload.email, payload.locale, attribution);
     await createSession({ userId: user.id, email: user.email });
     await setLocale(payload.locale);
   } catch (err) {
@@ -26,5 +42,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=invalid_link`);
   }
 
-  return NextResponse.redirect(`${origin}/dashboard`);
+  const destination =
+    payload.next && payload.next.startsWith("/") && !payload.next.startsWith("//")
+      ? payload.next
+      : "/dashboard";
+  const response = NextResponse.redirect(`${origin}${destination}`);
+  response.cookies.delete(ATTRIBUTION_COOKIE);
+  return response;
 }

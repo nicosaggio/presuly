@@ -1,12 +1,35 @@
 import Link from "next/link";
-import { getDictionary } from "@/lib/i18n/server";
+import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { createBudget } from "@/lib/actions/budgets";
+import { getTemplateBySlug } from "@/lib/templates/data";
 import { BudgetForm } from "@/components/budget-form";
+import { nanoid } from "nanoid";
 
 export default async function NewBudgetPage(props: PageProps<"/dashboard/new">) {
-  const dict = await getDictionary();
+  const [dict, locale] = await Promise.all([getDictionary(), getLocale()]);
   const searchParams = await props.searchParams;
   const limitReached = searchParams?.error === "limit_reached";
+
+  const templateSlug =
+    typeof searchParams?.template === "string" ? searchParams.template : undefined;
+  const template = templateSlug ? getTemplateBySlug(templateSlug) : null;
+
+  const initialValues = template
+    ? {
+        title: template.title[locale],
+        intro: template.intro[locale],
+        scope: template.scope[locale],
+        conditions: template.conditions[locale],
+        currency: template.currency,
+        items: template.items.map((item) => ({
+          id: nanoid(8),
+          description: item.description[locale],
+          price: item.price,
+          optional: item.optional,
+          selected: true,
+        })),
+      }
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -19,7 +42,7 @@ export default async function NewBudgetPage(props: PageProps<"/dashboard/new">) 
           </Link>
         </div>
       ) : (
-        <BudgetForm dict={dict} action={createBudget} />
+        <BudgetForm dict={dict} action={createBudget} initialValues={initialValues} />
       )}
     </div>
   );

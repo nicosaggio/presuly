@@ -24,20 +24,38 @@ function emptyItem(): BudgetItem {
   return { id: nanoid(8), description: "", price: 0, optional: false, selected: true };
 }
 
+type TemplateValues = {
+  title?: string;
+  intro?: string;
+  scope?: string;
+  conditions?: string;
+  currency?: string;
+  items?: BudgetItem[];
+};
+
 export function BudgetForm({
   dict,
   budget,
+  initialValues,
   action,
 }: {
   dict: Dictionary;
   budget?: Budget;
+  /** Precarga de contenido (ej: desde una plantilla) cuando se crea un presupuesto nuevo. */
+  initialValues?: TemplateValues;
   action: (formData: FormData) => void | Promise<void>;
 }) {
   const formId = useId();
   const [items, setItems] = useState<BudgetItem[]>(
-    budget?.items?.length ? budget.items : [emptyItem()]
+    budget?.items?.length
+      ? budget.items
+      : initialValues?.items?.length
+        ? initialValues.items
+        : [emptyItem()]
   );
-  const [currency, setCurrency] = useState(budget?.currency ?? "ARS");
+  const [currency, setCurrency] = useState(
+    budget?.currency ?? initialValues?.currency ?? "ARS"
+  );
   const [isPending, startTransition] = useTransition();
 
   function updateItem(id: string, patch: Partial<BudgetItem>) {
@@ -73,7 +91,7 @@ export function BudgetForm({
           <Input
             id="title"
             name="title"
-            defaultValue={budget?.title}
+            defaultValue={budget?.title ?? initialValues?.title}
             placeholder={dict.editor.fieldTitlePlaceholder}
             required
           />
@@ -98,7 +116,7 @@ export function BudgetForm({
         <Textarea
           id="intro"
           name="intro"
-          defaultValue={budget?.intro ?? ""}
+          defaultValue={budget?.intro ?? initialValues?.intro ?? ""}
           placeholder={dict.editor.fieldIntroPlaceholder}
           rows={3}
         />
@@ -106,7 +124,12 @@ export function BudgetForm({
 
       <div className="space-y-2">
         <Label htmlFor="scope">{dict.editor.fieldScope}</Label>
-        <Textarea id="scope" name="scope" defaultValue={budget?.scope ?? ""} rows={4} />
+        <Textarea
+          id="scope"
+          name="scope"
+          defaultValue={budget?.scope ?? initialValues?.scope ?? ""}
+          rows={4}
+        />
       </div>
 
       <div className="space-y-3">
@@ -164,7 +187,7 @@ export function BudgetForm({
         <Textarea
           id="conditions"
           name="conditions"
-          defaultValue={budget?.conditions ?? ""}
+          defaultValue={budget?.conditions ?? initialValues?.conditions ?? ""}
           placeholder={dict.editor.fieldConditionsPlaceholder}
           rows={3}
         />

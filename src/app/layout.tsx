@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
   title: "Presuly — Presupuestos que se envían como link",
   description:
     "Armá presupuestos profesionales, envialos como link y enterate cuando tu cliente los abre y acepta.",

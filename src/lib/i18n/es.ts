@@ -12,6 +12,7 @@ export const es = {
     terms: "Términos",
     privacy: "Privacidad",
     refunds: "Reembolsos",
+    templates: "Plantillas",
     linkCopied: "Link copiado",
     logout: "Cerrar sesión",
   },
@@ -56,6 +57,14 @@ export const es = {
     planBadgePro: "Pro",
     planBadgeStudio: "Estudio",
   },
+  templatesGallery: {
+    title: "Plantillas de presupuestos",
+    subtitle: "Elegí una plantilla para tu rubro y empezá con la mitad del trabajo hecho.",
+    useTemplate: "Usar esta plantilla",
+    backToGallery: "Ver todas las plantillas",
+    itemsTitle: "Detalle de ejemplo",
+    conditionsTitle: "Condiciones sugeridas",
+  },
   billing: {
     title: "Tu plan",
     currentPlan: "Plan actual",
@@ -80,6 +89,9 @@ export const es = {
     currentlyOnPlan: "Estás en el plan {plan}.",
     pastDue: "Tu último pago falló. Actualizá tu método de pago para no perder el plan Pro.",
     canceled: "Tu suscripción está cancelada. Vas a volver al plan gratis al final del período pagado.",
+    referralTitle: "Invitá y ganá un mes de Pro",
+    referralDescription:
+      "Cuando alguien se registra con tu link y manda su primer presupuesto, ambos ganan un mes de Pro gratis.",
   },
   editor: {
     newTitle: "Nuevo presupuesto",

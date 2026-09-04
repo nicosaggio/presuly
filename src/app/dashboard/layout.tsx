@@ -35,6 +35,14 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
           <Link href="/dashboard/billing">
             <Badge variant={plan === "free" ? "outline" : "default"}>{planLabel}</Badge>
           </Link>
+          {session.email === process.env.ADMIN_EMAIL && (
+            <Link
+              href="/dashboard/metrics"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              k
+            </Link>
+          )}
           <LocaleSwitcher current={locale} />
           <LogoutButton label={dict.common.logout} />
         </div>
