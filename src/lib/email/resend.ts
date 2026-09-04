@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { checkEmailQuota } from "./quota";
 
 let client: Resend | null = null;
 
@@ -19,12 +20,15 @@ function getFrom() {
   return process.env.EMAIL_FROM ?? "Presuly <onboarding@resend.dev>";
 }
 
-export async function sendEmail(opts: {
+export type SendEmailOpts = {
   to: string;
   subject: string;
   html: string;
   attachments?: { filename: string; content: Buffer }[];
-}) {
+};
+
+/** Pega directo a Resend, sin tocar el contador de cuota (lo usa el propio aviso de cuota). */
+export async function sendRaw(opts: SendEmailOpts) {
   const resend = getClient();
   const result = await resend.emails.send({
     from: getFrom(),
@@ -40,4 +44,11 @@ export async function sendEmail(opts: {
     throw new Error(`Resend error: ${result.error.message}`);
   }
   return result.data;
+}
+
+export async function sendEmail(opts: SendEmailOpts) {
+  const data = await sendRaw(opts);
+  // Fire-and-forget: nunca debe romper el envío real si falla el conteo.
+  checkEmailQuota().catch((err) => console.error("checkEmailQuota failed", err));
+  return data;
 }

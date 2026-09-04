@@ -15,6 +15,10 @@
 3. Corré las migraciones contra tu Neon: `npm run db:push` (usa el schema directo, sin generar SQL — más rápido para desarrollo. Para producción preferí `npm run db:generate` + `npm run db:migrate`, que sí versiona el SQL en `/drizzle`).
 4. `npm run dev`
 
+**Ojo:** el `DATABASE_URL` de `.env.local` y el que está cargado en Netlify (producción) apuntan al **mismo** proyecto Neon — no hay base separada de desarrollo. Cualquier dato que se crea corriendo `npm run dev` local queda en la base real. Tenerlo presente al probar features que escriben datos (usar cuentas/datos de prueba identificables y borrarlos después).
+
+**`npm run db:migrate` no funciona en este entorno** (agente en sandbox): usa el driver `pg` de `drizzle-kit`, que conecta por TCP directo (puerto 5432) y ese puerto no tiene salida acá — solo sale HTTPS. Se cuelga sin error claro (exit 1 después de "applying migrations..." sin más detalle). Workaround usado: generar la migración igual con `npm run db:generate` (no toca la red) y después aplicar el SQL resultante a mano contra `DATABASE_URL` con `@neondatabase/serverless` (el mismo driver HTTP que usa la app en runtime), vía un script de una sola vez. Si esto corre en una terminal normal del usuario (no en el agente), `npm run db:migrate` debería andar sin problema.
+
 ## Deploy a Netlify
 
 1. Conectar el repo a Netlify (o `netlify deploy` con la CLI).
@@ -39,6 +43,15 @@ Recién cuando 1-5 estén listos tiene sentido cambiar las variables de entorno 
 ### Bloqueante conocido: "Unrecognized Git contributor" en Netlify
 
 Los pushes automáticos (CI) desde este entorno quedan bloqueados con `Build blocked: Unrecognized Git contributor` — el plan de Netlify exige aprobar manualmente commits de contribuidores no reconocidos antes de buildearlos. No es algo resoluble por API (lo intenté, `updateSite` con `untrusted_flow` no tuvo efecto). Hay que entrar a **Site configuration → Build & deploy** (o la pestaña **Deploys** del sitio) y aprobar/reintentar el deploy bloqueado, o agregar el email del commit como colaborador de confianza del team.
+
+## Límites de los servicios y aviso de cuota
+
+Todo corre sobre planes gratis (Neon, Resend, Netlify) — el primero en quedarse corto con uso real va a ser **Resend** (100 emails/día en el free). Para no enterarse por un magic link que no llegó:
+
+- Cada `sendEmail()` (`src/lib/email/resend.ts`) registra el envío en la tabla `email_sends` y dispara `checkEmailQuota()` (`src/lib/email/quota.ts`), en background, sin bloquear el envío real.
+- Si en las últimas 24hs se llega a 80 emails (80% del límite de 100/día), le manda un aviso por mail a `ADMIN_EMAIL` — como mucho uno cada 20hs (guardado en la tabla `system_state`, clave `resend_daily_quota_alert`), para no saturar con avisos repetidos el mismo día en que ya se sabe.
+- `email_sends` se poda solo (borra registros de más de 2 días) en cada chequeo — no crece sin límite.
+- Esto NO cubre Neon (horas de cómputo del plan free) ni Netlify (invocaciones de funciones) — para esos dos conviene activar las alertas de uso propias de cada dashboard (Neon: Project settings → Billing; Netlify: Team settings → Usage), no hay forma de leerlas por API con lo que tenemos configurado hoy.
 
 ## Simplificaciones deliberadas de Fase 1 (no son bugs)
 

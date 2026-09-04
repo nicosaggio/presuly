@@ -121,6 +121,20 @@ export const acceptances = pgTable("acceptances", {
     .defaultNow(),
 });
 
+/** Un registro liviano por cada email transaccional enviado, solo para medir volumen contra
+ * el límite diario del plan free de Resend (ver src/lib/email/quota.ts). Se poda solo. */
+export const emailSends = pgTable("email_sends", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Key-value chico para flags operativos (ej: cuándo se mandó el último aviso de cuota). */
+export const systemState = pgTable("system_state", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type Budget = typeof budgets.$inferSelect;
 export type Acceptance = typeof acceptances.$inferSelect;
