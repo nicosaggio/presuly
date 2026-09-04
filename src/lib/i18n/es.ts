@@ -13,6 +13,7 @@ export const es = {
     privacy: "Privacidad",
     refunds: "Reembolsos",
     templates: "Plantillas",
+    howItWorks: "¿Cómo funciona?",
     pricing: "Precios",
     contact: "hola@presuly.com.ar",
     linkCopied: "Link copiado",
@@ -111,6 +112,7 @@ export const es = {
   },
   billing: {
     title: "Tu plan",
+    publicTitle: "Planes y precios de Presuly",
     currentPlan: "Plan actual",
     free: "Gratis",
     pro: "Pro",

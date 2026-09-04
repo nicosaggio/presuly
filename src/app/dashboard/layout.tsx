@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
@@ -8,6 +9,12 @@ import { LocaleSwitcher } from "@/components/locale-switcher";
 import { LogoutButton } from "@/components/logout-button";
 import { Logo } from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
+
+// El área logueada es privada — ya bloqueada en robots.ts, esto es defensa
+// en profundidad (aplica a todas las rutas /dashboard/*).
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
   const session = await getSession();
@@ -44,6 +51,12 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
             className="text-sm text-muted-foreground hover:text-foreground"
           >
             {dict.common.templates}
+          </Link>
+          <Link
+            href="/#como-funciona"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            {dict.common.howItWorks}
           </Link>
         </div>
         <div className="flex items-center gap-3 sm:gap-4">

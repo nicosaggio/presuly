@@ -15,6 +15,7 @@ export const en: Dictionary = {
     privacy: "Privacy",
     refunds: "Refunds",
     templates: "Templates",
+    howItWorks: "How it works",
     pricing: "Pricing",
     contact: "hola@presuly.com.ar",
     linkCopied: "Link copied",
@@ -112,6 +113,7 @@ export const en: Dictionary = {
   },
   billing: {
     title: "Your plan",
+    publicTitle: "Presuly plans and pricing",
     currentPlan: "Current plan",
     free: "Free",
     pro: "Pro",

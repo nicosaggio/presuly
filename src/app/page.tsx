@@ -48,7 +48,7 @@ export default async function Home() {
         <p className="mt-4 text-sm text-muted-foreground">{dict.landing.freeNote}</p>
       </main>
 
-      <section className="border-t px-6 py-16">
+      <section id="como-funciona" className="border-t px-6 py-16">
         <div className="mx-auto max-w-4xl space-y-10">
           <div className="mx-auto max-w-xl space-y-2 text-center">
             <h2 className="text-2xl sm:text-3xl font-semibold">{dict.landing.howItWorksTitle}</h2>
