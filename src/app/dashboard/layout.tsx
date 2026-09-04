@@ -39,6 +39,12 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
           >
             {dict.dashboard.title}
           </Link>
+          <Link
+            href="/templates"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            {dict.common.templates}
+          </Link>
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
           <Link href="/dashboard/billing">
