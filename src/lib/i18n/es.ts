@@ -158,12 +158,9 @@ export const es = {
     fieldScopeHint: "Sé específico: qué vas a entregar, en cuánto tiempo, y qué NO está incluido.",
     fieldScopePlaceholder: "Ej: 5 secciones de diseño, responsive, 2 rondas de ajustes. No incluye redacción de textos.",
     fieldItems: "Ítems del presupuesto",
-    fieldItemsHint: "Cada línea es algo que cobrás por separado. Tildá \"Opcional\" para que el cliente pueda sumarlo o sacarlo.",
+    fieldItemsHint: "Cada línea es algo que cobrás por separado.",
     itemDescription: "Descripción",
     itemPrice: "Precio",
-    itemOptional: "Opcional (el cliente puede tildarlo)",
-    itemOptionalTooltip:
-      "El cliente puede sumar o sacar este ítem del presupuesto antes de aceptarlo, y el total se recalcula solo.",
     addItem: "Agregar ítem",
     fieldConditions: "Condiciones",
     fieldConditionsHint: "Forma de pago, plazos de entrega, política de cambios — lo que quieras dejar por escrito.",

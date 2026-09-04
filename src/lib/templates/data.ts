@@ -38,7 +38,7 @@ export const templates: BudgetTemplate[] = [
     items: [
       { description: { es: "Diseño UI (hasta 5 secciones)", en: "UI design (up to 5 sections)" }, price: 600, optional: false },
       { description: { es: "Desarrollo y publicación", en: "Development & launch" }, price: 900, optional: false },
-      { description: { es: "Mantenimiento mensual (3 meses)", en: "Monthly maintenance (3 months)" }, price: 150, optional: true },
+      { description: { es: "Mantenimiento mensual (3 meses)", en: "Monthly maintenance (3 months)" }, price: 150, optional: false },
     ],
   },
   {
@@ -62,7 +62,7 @@ export const templates: BudgetTemplate[] = [
       { description: { es: "Investigación y moodboard", en: "Research & moodboard" }, price: 150, optional: false },
       { description: { es: "Diseño de logotipo", en: "Logo design" }, price: 400, optional: false },
       { description: { es: "Manual de marca", en: "Brand manual" }, price: 250, optional: false },
-      { description: { es: "Aplicaciones (papelería, redes)", en: "Applications (stationery, social media)" }, price: 200, optional: true },
+      { description: { es: "Aplicaciones (papelería, redes)", en: "Applications (stationery, social media)" }, price: 200, optional: false },
     ],
   },
   {
@@ -85,8 +85,8 @@ export const templates: BudgetTemplate[] = [
     items: [
       { description: { es: "Cobertura del día (8 horas)", en: "Wedding day coverage (8 hours)" }, price: 900, optional: false },
       { description: { es: "Edición y entrega digital", en: "Editing & digital delivery" }, price: 300, optional: false },
-      { description: { es: "Álbum impreso (30x30cm)", en: "Printed album (30x30cm)" }, price: 250, optional: true },
-      { description: { es: "Segundo fotógrafo", en: "Second photographer" }, price: 300, optional: true },
+      { description: { es: "Álbum impreso (30x30cm)", en: "Printed album (30x30cm)" }, price: 250, optional: false },
+      { description: { es: "Segundo fotógrafo", en: "Second photographer" }, price: 300, optional: false },
     ],
   },
   {
@@ -110,7 +110,7 @@ export const templates: BudgetTemplate[] = [
       { description: { es: "Demolición e instalaciones", en: "Demolition & utilities" }, price: 800, optional: false },
       { description: { es: "Muebles y mesada", en: "Cabinets & countertop" }, price: 2200, optional: false },
       { description: { es: "Pintura y terminaciones", en: "Painting & finishing" }, price: 400, optional: false },
-      { description: { es: "Iluminación LED bajo alacena", en: "Under-cabinet LED lighting" }, price: 180, optional: true },
+      { description: { es: "Iluminación LED bajo alacena", en: "Under-cabinet LED lighting" }, price: 180, optional: false },
     ],
   },
   {
@@ -133,7 +133,7 @@ export const templates: BudgetTemplate[] = [
     items: [
       { description: { es: "Auditoría técnica inicial", en: "Initial technical audit" }, price: 300, optional: false },
       { description: { es: "Gestión mensual SEO", en: "Monthly SEO management" }, price: 450, optional: false },
-      { description: { es: "Artículos de blog adicionales (c/u)", en: "Extra blog posts (each)" }, price: 60, optional: true },
+      { description: { es: "Artículos de blog adicionales (c/u)", en: "Extra blog posts (each)" }, price: 60, optional: false },
     ],
   },
   {
@@ -156,7 +156,7 @@ export const templates: BudgetTemplate[] = [
     items: [
       { description: { es: "Contenido y publicación (12 piezas/mes)", en: "Content & posting (12 pieces/mo)" }, price: 350, optional: false },
       { description: { es: "Gestión de campañas de pauta", en: "Ad campaign management" }, price: 250, optional: false },
-      { description: { es: "Piezas de video adicionales", en: "Extra video pieces" }, price: 80, optional: true },
+      { description: { es: "Piezas de video adicionales", en: "Extra video pieces" }, price: 80, optional: false },
     ],
   },
 ];

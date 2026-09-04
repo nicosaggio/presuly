@@ -159,12 +159,9 @@ export const en: Dictionary = {
     fieldScopeHint: "Be specific: what you'll deliver, how long it takes, and what's NOT included.",
     fieldScopePlaceholder: "E.g: 5 design sections, responsive, 2 rounds of revisions. Copywriting not included.",
     fieldItems: "Line items",
-    fieldItemsHint: "Each line is something billed separately. Check \"Optional\" so the client can add or remove it.",
+    fieldItemsHint: "Each line is something billed separately.",
     itemDescription: "Description",
     itemPrice: "Price",
-    itemOptional: "Optional (client can toggle it)",
-    itemOptionalTooltip:
-      "The client can add or remove this item from the proposal before accepting, and the total updates automatically.",
     addItem: "Add item",
     fieldConditions: "Conditions",
     fieldConditionsHint: "Payment terms, delivery timelines, revision policy — whatever you want in writing.",

@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -18,8 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info, Paperclip, X } from "lucide-react";
+import { Paperclip, X } from "lucide-react";
 import { toast } from "sonner";
 
 const CURRENCIES = ["ARS", "USD", "MXN", "EUR", "COP", "CLP"];
@@ -329,29 +327,6 @@ export function BudgetForm({
                 onChange={(e) => handlePriceChange(item, e)}
                 onBlur={() => handlePriceBlur(item)}
               />
-              <label className="flex items-center gap-2 text-sm whitespace-nowrap">
-                <Checkbox
-                  checked={item.optional}
-                  onCheckedChange={(checked) =>
-                    updateItem(item.id, { optional: checked === true })
-                  }
-                />
-                {dict.editor.itemOptional}
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <button
-                        type="button"
-                        className="text-muted-foreground hover:text-foreground"
-                        aria-label={dict.editor.itemOptional}
-                      />
-                    }
-                  >
-                    <Info className="size-3.5" />
-                  </TooltipTrigger>
-                  <TooltipContent>{dict.editor.itemOptionalTooltip}</TooltipContent>
-                </Tooltip>
-              </label>
               <Button
                 type="button"
                 variant="ghost"
