@@ -29,17 +29,22 @@
 5. Variables de Paddle (Fase 2): `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `NEXT_PUBLIC_PADDLE_ENV`, `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN`, `PADDLE_PRICE_PRO_MONTHLY`, `PADDLE_PRICE_PRO_ANNUAL` — ver `.env.example` para dónde sacar cada uno. Con solo la `PADDLE_API_KEY` ya se puede crear el producto y los precios por API (`paddle.products.create` / `paddle.prices.create`) y el webhook (`paddle.notificationSettings.create`, que devuelve el secret directo) sin tocar el dashboard.
 6. **Dominios aprobados en Paddle**: el checkout de Paddle.js solo abre desde dominios aprobados manualmente (Checkout → Checkout Settings → Approved Domains) — esto no se puede hacer por API, es una pantalla del dashboard. `localhost` no siempre lo acepta; para probar el checkout localmente puede hacer falta un túnel (ngrok) o probar directo contra el dominio de producción ya aprobado.
 
-### Pasar Paddle de Sandbox a Live
+### Paddle Live — activo en producción (confirmado 2026-09-04)
 
-El catálogo, precios y webhook de Live ya están creados por API (ver `.env.local`, comentado bajo "Paddle LIVE"). Falta, antes de activarlo en producción:
+Netlify tiene `NEXT_PUBLIC_PADDLE_ENV=production` con API key, client-side token y precios Live reales. El checkout de producción cobra con tarjetas de verdad.
 
-1. **Client-side token Live**: Developer Tools → Authentication → Client-side tokens, con la cuenta en modo Live (no lo genera la API).
-2. **Verificación de cuenta**: datos del negocio + cuenta bancaria para payouts, en Business account → Payouts. Esto lo carga el usuario directo en Paddle, nunca por acá — son datos financieros reales.
-3. **Approved Domains** (modo Live, es una lista separada de la de Sandbox): Checkout → Checkout Settings → agregar `presuly.com.ar`.
-4. **Default payment link** (modo Live, también separado de Sandbox): mismo lugar, poner `https://presuly.com.ar/dashboard/billing`.
-5. **Solicitar aprobación de dominio**: Checkout → Request domain approval. A diferencia de Sandbox (que aprueba automático), en Live esto lo revisa Paddle — conviene mandarlo ni bien se activa Live para que corra en paralelo con la verificación.
+**Cambiar un precio de Pro/Estudio en Live** (ya se hizo una vez, ver `DECISIONS.md`): crear el precio nuevo por API en vez de editar el existente (grandfathering — nadie que ya paga se entera):
 
-Recién cuando 1-5 estén listos tiene sentido cambiar las variables de entorno de producción (`PADDLE_API_KEY`, `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN`, `NEXT_PUBLIC_PADDLE_ENV=production`, `PADDLE_PRICE_PRO_MONTHLY`, `PADDLE_PRICE_PRO_ANNUAL`, `PADDLE_WEBHOOK_SECRET`) de los valores de Sandbox a los de Live — hacerlo antes rompe el checkout para cualquiera que esté probando en producción mientras tanto.
+```
+POST https://api.paddle.com/prices
+Authorization: Bearer <PADDLE_API_KEY live>
+{ "product_id": "<el mismo de siempre>", "unit_price": { "amount": "<centavos>", "currency_code": "USD" },
+  "billing_cycle": { "interval": "month"|"year", "frequency": 1 }, "tax_mode": "account_setting" }
+```
+
+Después actualizar `PADDLE_PRICE_PRO_MONTHLY`/`PADDLE_PRICE_PRO_ANNUAL` en Netlify (Site configuration → Environment variables, o por su API: `PUT /api/v1/accounts/{account}/env/{key}?site_id={id}`) y en `.env.local` los equivalentes de Sandbox (mismo endpoint pero `sandbox-api.paddle.com`, con la API key sandbox), y hacer un deploy nuevo para que tome el cambio.
+
+**Local sigue en Sandbox a propósito** (localhost no está en Approved Domains de Live). Las credenciales Live quedan comentadas en `.env.local` bajo "Paddle LIVE" como referencia — no descomentar ahí, ya están cargadas en Netlify.
 
 ### Bloqueante conocido: "Unrecognized Git contributor" en Netlify
 
