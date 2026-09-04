@@ -13,6 +13,7 @@ export const es = {
     privacy: "Privacidad",
     refunds: "Reembolsos",
     templates: "Plantillas",
+    contact: "hola@presuly.com.ar",
     linkCopied: "Link copiado",
     logout: "Cerrar sesión",
   },

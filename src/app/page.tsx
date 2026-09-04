@@ -47,7 +47,10 @@ export default async function Home() {
         <p className="mt-4 text-sm text-muted-foreground">{dict.landing.freeNote}</p>
       </main>
 
-      <footer className="flex items-center justify-center gap-4 px-6 py-6 text-xs text-muted-foreground border-t">
+      <footer className="flex flex-wrap items-center justify-center gap-4 px-6 py-6 text-xs text-muted-foreground border-t">
+        <a href="mailto:hola@presuly.com.ar" className="hover:text-foreground">
+          {dict.common.contact}
+        </a>
         <Link href="/templates" className="hover:text-foreground">
           {dict.common.templates}
         </Link>
