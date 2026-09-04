@@ -41,7 +41,7 @@ export default async function Home() {
           {dict.landing.subtitle}
         </p>
         <div className="mt-10">
-          <LinkButton href="/login" size="lg" className="h-12 px-8 text-base">
+          <LinkButton href="/login" size="lg">
             {dict.landing.cta}
           </LinkButton>
         </div>
