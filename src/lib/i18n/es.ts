@@ -164,6 +164,7 @@ export const es = {
     itemDescription: "Descripción",
     itemPrice: "Precio",
     addItem: "Agregar ítem",
+    useSavedItem: "Usar ítem guardado",
     fieldConditions: "Condiciones",
     fieldConditionsHint: "Forma de pago, plazos de entrega, política de cambios — lo que quieras dejar por escrito.",
     fieldConditionsPlaceholder: "Forma de pago, plazos, alcance no incluido…",

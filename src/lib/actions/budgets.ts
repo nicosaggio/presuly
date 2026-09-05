@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { budgets, acceptances, users, type BudgetItem, type BudgetAttachment } from "@/lib/db/schema";
+import { saveItemsForUser } from "@/lib/db/queries";
 import { getSession } from "@/lib/auth/session";
 import { getLocale } from "@/lib/i18n/server";
 import { activeBudgetLimit, ACTIVE_BUDGET_STATUSES, hasBranding } from "@/lib/plans";
@@ -193,6 +194,8 @@ export async function createBudget(formData: FormData) {
     })
     .returning({ id: budgets.id });
 
+  await saveItemsForUser(session.userId, data.items as BudgetItem[], data.currency);
+
   redirect(`/dashboard/${created.id}`);
 }
 
@@ -220,6 +223,8 @@ export async function updateBudget(id: string, formData: FormData) {
       updatedAt: new Date(),
     })
     .where(eq(budgets.id, id));
+
+  await saveItemsForUser(budget.userId, data.items as BudgetItem[], data.currency);
 
   revalidatePath(`/dashboard/${id}`);
 }

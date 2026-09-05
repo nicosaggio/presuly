@@ -4,7 +4,7 @@ import { useId, useRef, useState, useTransition } from "react";
 import { nanoid } from "nanoid";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
-import type { Budget, BudgetItem, BudgetAttachment } from "@/lib/db/schema";
+import type { Budget, BudgetItem, BudgetAttachment, SavedItem } from "@/lib/db/schema";
 import { formatCurrency } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Paperclip, X } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Paperclip, X, History } from "lucide-react";
 import { toast } from "sonner";
 
 const CURRENCIES = ["ARS", "USD", "MXN", "EUR", "COP", "CLP"];
@@ -62,6 +68,7 @@ export function BudgetForm({
   budget,
   initialValues,
   action,
+  savedItems = [],
 }: {
   dict: Dictionary;
   locale: Locale;
@@ -69,6 +76,8 @@ export function BudgetForm({
   /** Precarga de contenido (ej: desde una plantilla) cuando se crea un presupuesto nuevo. */
   initialValues?: TemplateValues;
   action: (formData: FormData) => void | Promise<void>;
+  /** Ítems que el usuario ya usó en otros presupuestos, para reusar sin reescribir. */
+  savedItems?: SavedItem[];
 }) {
   const formId = useId();
   const [items, setItems] = useState<BudgetItem[]>(
@@ -98,6 +107,24 @@ export function BudgetForm({
 
   function addItem() {
     setItems((prev) => [...prev, emptyItem()]);
+  }
+
+  /** Agrega un ítem de la biblioteca personal como un ítem nuevo, editable —
+   * si la única línea que hay todavía está vacía (el caso típico al arrancar
+   * un presupuesto nuevo), la reemplaza en vez de sumar una línea vacía de más. */
+  function addSavedItem(saved: SavedItem) {
+    const newItem: BudgetItem = {
+      id: nanoid(8),
+      description: saved.description,
+      price: saved.price,
+      optional: false,
+      selected: true,
+    };
+    setItems((prev) =>
+      prev.length === 1 && prev[0].description === "" && prev[0].price === 0
+        ? [newItem]
+        : [...prev, newItem]
+    );
   }
 
   function removeItem(id: string) {
@@ -338,9 +365,33 @@ export function BudgetForm({
             </div>
           ))}
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={addItem}>
-          {dict.editor.addItem}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={addItem}>
+            {dict.editor.addItem}
+          </Button>
+          {savedItems.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button type="button" variant="outline" size="sm">
+                    <History />
+                    {dict.editor.useSavedItem}
+                  </Button>
+                }
+              />
+              <DropdownMenuContent>
+                {savedItems.map((saved) => (
+                  <DropdownMenuItem key={saved.id} onClick={() => addSavedItem(saved)}>
+                    <span className="min-w-0 flex-1 truncate">{saved.description}</span>
+                    <span className="shrink-0 text-muted-foreground tabular-nums">
+                      {formatCurrency(saved.price, saved.currency, locale)}
+                    </span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
 
       <div className="space-y-3">

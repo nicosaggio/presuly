@@ -52,3 +52,9 @@ Feedback de un grupo de testers cercanos comparó Presuly con Odoo (que ofrece p
 ## 2026-09-04 — Botones e inputs más grandes (feedback de testers)
 
 Feedback del mismo grupo: los inputs y botones del login y de las tarjetas de precios se veían "pequeñitos", con poco padding. Se subieron las alturas y el padding horizontal en los componentes base compartidos (`src/components/ui/{button,input,select,textarea}.tsx`) — no en instancias sueltas — para que el ajuste alcance a toda la app de una vez: botón `default` de `h-8` a `h-10`, `sm` de `h-7` a `h-9`, `lg` de `h-9` a `h-12` (con `text-base`); inputs y el trigger de `Select` de `h-8` a `h-11`. El botón grande de la landing (que se había agrandado a mano un rato antes) quedó cubierto por el nuevo tamaño `lg` y se le sacó el override.
+
+## 2026-09-05 — Biblioteca de ítems reutilizables por cuenta
+
+El usuario pidió poder reusar en un presupuesto nuevo los ítems que ya cargó antes, sin que precios viejos generen confusión. Se agregó la tabla `saved_items` (`user_id`, `description`, `price`, `currency`, `updated_at`), con un índice único en `(user_id, description)`: cada vez que se guarda o publica un presupuesto (`createBudget`/`updateBudget`), sus ítems se hacen upsert ahí — la misma descripción nunca se duplica, siempre queda con el precio y la moneda del uso más reciente (`saveItemsForUser` en `src/lib/db/queries.ts`). En el editor, un botón "Usar ítem guardado" (dropdown, hasta 50 ítems más recientes) agrega el ítem elegido como una línea nueva editable — si reemplaza la línea vacía inicial en vez de sumarla, para no dejar un renglón de más. El precio siempre se puede cambiar ahí mismo antes de guardar, como pidió el usuario explícitamente.
+
+No se filtra ni convierte por moneda: si el mismo ítem se usó antes en otra moneda, el dropdown lo muestra con esa moneda (ej. "US$ 550,00") para que quede claro que puede no corresponder a la moneda del presupuesto actual.

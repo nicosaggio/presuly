@@ -57,6 +57,13 @@
       "when": 1788547502708,
       "tag": "0007_striped_vargas",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788619625014,
+      "tag": "0008_damp_apocalypse",
+      "breakpoints": true
     }
   ]
 }
