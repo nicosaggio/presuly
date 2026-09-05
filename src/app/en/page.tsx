@@ -6,6 +6,6 @@ export const metadata: Metadata = {
   alternates: buildAlternates("/"),
 };
 
-export default function Home() {
-  return <HomePage locale="es" />;
+export default function EnglishHome() {
+  return <HomePage locale="en" />;
 }
