@@ -16,7 +16,7 @@ export async function generateMetadata(
   return {
     title: `${template.title.es} — Plantilla gratis | Presuly`,
     description: template.intro.es,
-    alternates: buildAlternates(`/templates/${slug}`),
+    alternates: buildAlternates("es", `/templates/${slug}`),
   };
 }
 

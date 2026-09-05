@@ -6,7 +6,7 @@ import { PLAN_PRICES } from "@/lib/plans";
 export const metadata: Metadata = {
   title: "Precios | Presuly",
   description: `Planes y precios de Presuly: gratis para siempre, o Pro por USD ${PLAN_PRICES.pro.monthlyUSD}/mes.`,
-  alternates: buildAlternates("/pricing"),
+  alternates: buildAlternates("es", "/pricing"),
 };
 
 export default function Page() {

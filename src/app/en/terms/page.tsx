@@ -5,7 +5,7 @@ import { legalContent } from "@/lib/legal/content";
 
 export const metadata: Metadata = {
   title: `${legalContent.en.terms.title} | Presuly`,
-  alternates: buildAlternates("/terms"),
+  alternates: buildAlternates("en", "/terms"),
 };
 
 export default function Page() {
