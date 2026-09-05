@@ -4,13 +4,16 @@ import type { LegalContent } from "@/lib/legal/content";
 export function LegalPage({
   content,
   backLabel,
+  homeHref = "/",
 }: {
   content: LegalContent;
   backLabel: string;
+  /** Adónde vuelve el link "← {backLabel}". Default "/" para no romper otros usos. */
+  homeHref?: string;
 }) {
   return (
     <div className="mx-auto max-w-2xl px-6 py-12 space-y-8">
-      <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+      <Link href={homeHref} className="text-sm text-muted-foreground hover:text-foreground">
         ← {backLabel}
       </Link>
 
