@@ -8,19 +8,19 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata(
-  props: PageProps<"/templates/[slug]">
+  props: PageProps<"/en/templates/[slug]">
 ): Promise<Metadata> {
   const { slug } = await props.params;
   const template = getTemplateBySlug(slug);
   if (!template) return {};
   return {
-    title: `${template.title.es} — Plantilla gratis | Presuly`,
-    description: template.intro.es,
+    title: `${template.title.en} — Free template | Presuly`,
+    description: template.intro.en,
     alternates: buildAlternates(`/templates/${slug}`),
   };
 }
 
-export default async function Page(props: PageProps<"/templates/[slug]">) {
+export default async function Page(props: PageProps<"/en/templates/[slug]">) {
   const { slug } = await props.params;
-  return <TemplateDetailPage locale="es" slug={slug} />;
+  return <TemplateDetailPage locale="en" slug={slug} />;
 }
