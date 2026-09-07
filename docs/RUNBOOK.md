@@ -88,6 +88,51 @@ Dos formas de acceso, para no depender de una sesión de navegador:
 y "5 anomalías más relevantes con severidad" — depende de tener Sentry
 configurado, que no está en el proyecto todavía.
 
+## Idioma de las páginas públicas de marketing (rutas por idioma, no cookie)
+
+Desde 2026-09-05 (ver `docs/DECISIONS.md`), las 7 páginas públicas de
+marketing — `/`, `/pricing`, `/templates`, `/templates/[slug]`, `/terms`,
+`/privacy`, `/refunds` — **ya no** resuelven el idioma leyendo la cookie
+`presuly_locale`: lo determina la URL. Español es el default sin prefijo
+(`/pricing`); inglés vive bajo `/en/...` (`/en/pricing`). Para probar el
+idioma de estas páginas en local, andá directo a la URL correspondiente —
+cambiar la cookie (el selector ES/EN de la home, o `document.cookie`) no
+tiene efecto ahí.
+
+**Esto NO aplica** a `/login`, `/dashboard/*` ni `/p/[token]`: esas siguen
+100% cookie-driven como siempre (`getLocale()`/`presuly_locale`), y
+`/p/[token]` sigue resolviendo el idioma desde `budget.locale` en la base,
+sin relación con la cookie ni con el visitante.
+
+Para agregar contenido nuevo a una de las 7 páginas migradas: el componente
+compartido vive en `src/components/pages/` (`home-page.tsx`,
+`pricing-page.tsx`, `templates-gallery-page.tsx`, `template-detail-page.tsx`,
+`legal-route-page.tsx`) y recibe `locale` como prop — ahí va la lógica y el
+JSX una sola vez. Los `page.tsx` bajo `src/app/` y `src/app/en/` son
+wrappers chicos: definen `metadata` (título/descripción por idioma +
+`alternates.languages` vía `buildAlternates()` en `src/lib/seo/alternates.ts`)
+e invocan el componente compartido con `locale="es"` o `locale="en"`
+literal. Un link interno entre estas páginas (footer, "volver a la
+galería") debe pasar por `localizedPath(locale, path)`
+(`src/lib/i18n/routes.ts`) para no perder el prefijo `/en` al navegar.
+
+Verificar rápido que el hreflang está bien en cualquiera de las 7 páginas:
+`curl -s <url> | grep -oE '<link[^>]*alternate[^>]*>'` — deben aparecer los
+tres (`es`, `en`, `x-default`). El sitemap (`/sitemap.xml`) lista ambas
+variantes de cada una de las 7 páginas (24 URLs: 12 páginas × 2 idiomas).
+
+**Limitación conocida, sin resolver:** el `<html lang>` y el `title`/`og:*`
+globales de `src/app/layout.tsx` siguen viniendo de la cookie para toda la
+app, `/en/*` incluido — así que el `<title>` de pestaña y el `og:locale` de
+`/en` (home) heredan el texto en español del layout compartido (pricing,
+templates y las páginas legales sí tienen su propio `title`/`description`
+en inglés a nivel de página, que pisa al del layout). Arreglarlo de raíz
+pediría un layout separado por idioma o un `proxy.ts` (el
+`middleware.ts` de versiones anteriores) que infiera el locale por path —
+ninguna de las dos se hizo porque quedaba fuera del alcance pedido y
+tocaba código compartido con `/login`/`/dashboard`/`/p/[token]`. Ver el
+detalle en `docs/DECISIONS.md`, entrada 2026-09-05.
+
 ## Identidad de marca
 
 `public/brand/` tiene el logo, isotipo, favicons e íconos oficiales; los tokens

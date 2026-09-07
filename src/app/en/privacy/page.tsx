@@ -4,10 +4,10 @@ import { buildAlternates } from "@/lib/seo/alternates";
 import { legalContent } from "@/lib/legal/content";
 
 export const metadata: Metadata = {
-  title: `${legalContent.es.privacy.title} | Presuly`,
-  alternates: buildAlternates("es", "/privacy"),
+  title: `${legalContent.en.privacy.title} | Presuly`,
+  alternates: buildAlternates("en", "/privacy"),
 };
 
 export default function Page() {
-  return <LegalRoutePage locale="es" section="privacy" />;
+  return <LegalRoutePage locale="en" section="privacy" />;
 }

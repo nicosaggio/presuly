@@ -3,9 +3,9 @@ import { HomePage } from "@/components/pages/home-page";
 import { buildAlternates } from "@/lib/seo/alternates";
 
 export const metadata: Metadata = {
-  alternates: buildAlternates("es", "/"),
+  alternates: buildAlternates("en", "/"),
 };
 
-export default function Home() {
-  return <HomePage locale="es" />;
+export default function EnglishHome() {
+  return <HomePage locale="en" />;
 }
