@@ -1,7 +1,8 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { db } from "./index";
-import { budgets, acceptances, users, type signupSourceEnum } from "./schema";
+import { budgets, acceptances, users, savedItems, type signupSourceEnum } from "./schema";
+import type { BudgetItem } from "./schema";
 
 export async function getBudgetByToken(token: string) {
   const [budget] = await db
@@ -75,4 +76,46 @@ export async function upsertUserByEmail(
     })
     .returning();
   return user;
+}
+
+export async function getSavedItems(userId: string) {
+  return db
+    .select()
+    .from(savedItems)
+    .where(eq(savedItems.userId, userId))
+    .orderBy(desc(savedItems.updatedAt))
+    .limit(50);
+}
+
+/**
+ * Sube cada ítem del presupuesto a la biblioteca personal del usuario, para
+ * poder reusarlo en un presupuesto futuro. Upsert por (userId, description):
+ * no acumula duplicados de la misma descripción, siempre queda con el precio
+ * y la moneda más recientes. Ítems con descripción vacía se ignoran.
+ */
+export async function saveItemsForUser(userId: string, items: BudgetItem[], currency: string) {
+  // Map por descripción: si el mismo presupuesto repite una descripción, se
+  // queda con la última — un solo INSERT no puede tocar la misma fila de
+  // conflicto dos veces.
+  const byDescription = new Map<string, BudgetItem>();
+  for (const item of items) {
+    const description = item.description.trim();
+    if (description.length > 0) byDescription.set(description, item);
+  }
+  if (byDescription.size === 0) return;
+
+  await db
+    .insert(savedItems)
+    .values(
+      Array.from(byDescription.entries()).map(([description, item]) => ({
+        userId,
+        description,
+        price: item.price,
+        currency,
+      }))
+    )
+    .onConflictDoUpdate({
+      target: [savedItems.userId, savedItems.description],
+      set: { price: sql`excluded.price`, currency: sql`excluded.currency`, updatedAt: new Date() },
+    });
 }

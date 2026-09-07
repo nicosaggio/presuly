@@ -8,9 +8,10 @@ const SIZES = {
   lg: { height: 36, width: 150 },
 } as const;
 
-type Variant = "auto" | "verde" | "blanco" | "tinta";
+type Variant = "auto" | "verde" | "blanco" | "blanco-check-verde" | "tinta";
 
 function pickSrc(base: "logo" | "isotipo", variant: Exclude<Variant, "auto">) {
+  if (variant === "blanco-check-verde") return `/brand/presuly-${base}-blanco-check-verde.svg`;
   if (variant === "blanco") return `/brand/presuly-${base}-blanco.svg`;
   if (variant === "tinta") return `/brand/presuly-${base}-tinta.svg`;
   return `/brand/presuly-${base}.svg`;
@@ -19,11 +20,13 @@ function pickSrc(base: "logo" | "isotipo", variant: Exclude<Variant, "auto">) {
 /** Logotipo horizontal de Presuly. Ver docs/MARCA.md: no reescribir el nombre
  * con texto, siempre el SVG vectorizado.
  *
- * `variant="auto"` (default) muestra la versión verde en modo claro y la
- * blanca en modo oscuro (sigue el mismo `prefers-color-scheme` que el resto
- * de los tokens — ver `.presuly-logo-light`/`.presuly-logo-dark` en
- * globals.css). Pasá un variant fijo solo cuando el fondo no cambia con el
- * tema (ej: sobre una foto, o el logo a una tinta para PDF). */
+ * `variant="auto"` (default) muestra la versión verde en modo claro y, en
+ * modo oscuro, la blanca con el check en el verde de modo oscuro (para que
+ * no se pierda el color de marca en el ícono — pedido explícito de diseño,
+ * 2026-09-07). Sigue el mismo `prefers-color-scheme` que el resto de los
+ * tokens — ver `.presuly-logo-light`/`.presuly-logo-dark` en globals.css.
+ * Pasá un variant fijo solo cuando el fondo no cambia con el tema (ej: sobre
+ * una foto, o el logo a una tinta para PDF). */
 export function Logo({
   size = "md",
   variant = "auto",
@@ -47,7 +50,7 @@ export function Logo({
           className={`presuly-logo-light ${className ?? ""}`}
         />
         <Image
-          src={pickSrc("logo", "blanco")}
+          src={pickSrc("logo", "blanco-check-verde")}
           alt="Presuly"
           height={height}
           width={width}
@@ -93,7 +96,7 @@ export function LogoMark({
           className={`presuly-logo-light ${className ?? ""}`}
         />
         <Image
-          src={pickSrc("isotipo", "blanco")}
+          src={pickSrc("isotipo", "blanco-check-verde")}
           alt=""
           height={size}
           width={size}

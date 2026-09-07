@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
+import { getSession } from "@/lib/auth/session";
+import { getSavedItems } from "@/lib/db/queries";
 import { createBudget } from "@/lib/actions/budgets";
 import { getTemplateBySlug } from "@/lib/templates/data";
 import { BudgetForm } from "@/components/budget-form";
 import { nanoid } from "nanoid";
 
 export default async function NewBudgetPage(props: PageProps<"/dashboard/new">) {
-  const [dict, locale] = await Promise.all([getDictionary(), getLocale()]);
+  const session = await getSession();
+  const [dict, locale, savedItems] = await Promise.all([
+    getDictionary(),
+    getLocale(),
+    session ? getSavedItems(session.userId) : Promise.resolve([]),
+  ]);
   const searchParams = await props.searchParams;
   const limitReached = searchParams?.error === "limit_reached";
 
@@ -42,7 +49,13 @@ export default async function NewBudgetPage(props: PageProps<"/dashboard/new">) 
           </Link>
         </div>
       ) : (
-        <BudgetForm dict={dict} locale={locale} action={createBudget} initialValues={initialValues} />
+        <BudgetForm
+          dict={dict}
+          locale={locale}
+          action={createBudget}
+          initialValues={initialValues}
+          savedItems={savedItems}
+        />
       )}
     </div>
   );

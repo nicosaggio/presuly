@@ -22,13 +22,9 @@ export async function HomePage({ locale }: { locale: Locale }) {
       <Suspense fallback={null}>
         <AttributionCapture />
       </Suspense>
-      <header className="flex items-center justify-between px-6 py-4 border-b">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3 border-b sm:px-6 sm:py-4">
         <Logo size="sm" />
-        <div className="flex items-center gap-4">
-          <LocaleSwitcher
-            current={locale}
-            hrefFor={{ es: localizedPath("es", "/"), en: localizedPath("en", "/") }}
-          />
+        <div className="flex items-center gap-3 sm:gap-4">
           <LinkButton
             href={session ? "/dashboard" : "/login"}
             variant="ghost"
@@ -36,6 +32,10 @@ export async function HomePage({ locale }: { locale: Locale }) {
           >
             {session ? dict.dashboard.title : dict.landing.ctaSecondary}
           </LinkButton>
+          <LocaleSwitcher
+            current={locale}
+            hrefFor={{ es: localizedPath("es", "/"), en: localizedPath("en", "/") }}
+          />
         </div>
       </header>
 

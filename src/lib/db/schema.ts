@@ -5,8 +5,10 @@ import {
   uuid,
   jsonb,
   integer,
+  doublePrecision,
   boolean,
   pgEnum,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const budgetStatusEnum = pgEnum("budget_status", [
@@ -156,6 +158,27 @@ export const magicLinkRequests = pgTable("magic_link_requests", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/** Biblioteca de ítems reutilizables por cuenta: al guardar/publicar un
+ * presupuesto, cada ítem se sube (por descripción) con su precio y moneda
+ * más recientes. No se acumulan duplicados de la misma descripción — el
+ * índice único fuerza un upsert que siempre refleja el último precio usado,
+ * para que reusar un ítem viejo no muestre un precio desactualizado. */
+export const savedItems = pgTable(
+  "saved_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    description: text("description").notNull(),
+    price: doublePrecision("price").notNull(),
+    currency: text("currency").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("saved_items_user_description_idx").on(table.userId, table.description)]
+);
+
 export type User = typeof users.$inferSelect;
 export type Budget = typeof budgets.$inferSelect;
 export type Acceptance = typeof acceptances.$inferSelect;
+export type SavedItem = typeof savedItems.$inferSelect;

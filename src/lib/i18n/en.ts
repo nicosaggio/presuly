@@ -165,6 +165,7 @@ export const en: Dictionary = {
     itemDescription: "Description",
     itemPrice: "Price",
     addItem: "Add item",
+    useSavedItem: "Use saved item",
     fieldConditions: "Conditions",
     fieldConditionsHint: "Payment terms, delivery timelines, revision policy — whatever you want in writing.",
     fieldConditionsPlaceholder: "Payment terms, timelines, what's out of scope…",

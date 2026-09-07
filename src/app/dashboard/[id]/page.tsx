@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
-import { getBudgetById } from "@/lib/db/queries";
+import { getBudgetById, getSavedItems } from "@/lib/db/queries";
 import { getDictionary, getLocale } from "@/lib/i18n/server";
 import { updateBudget, publishBudget } from "@/lib/actions/budgets";
 import { BudgetForm } from "@/components/budget-form";
@@ -10,11 +10,12 @@ import { BudgetPublishPanel } from "@/components/budget-publish-panel";
 export default async function EditBudgetPage(props: PageProps<"/dashboard/[id]">) {
   const { id } = await props.params;
   const session = await getSession();
-  const [dict, locale, budget, h] = await Promise.all([
+  const [dict, locale, budget, h, savedItems] = await Promise.all([
     getDictionary(),
     getLocale(),
     getBudgetById(id),
     headers(),
+    session ? getSavedItems(session.userId) : Promise.resolve([]),
   ]);
 
   if (!budget || budget.userId !== session!.userId) notFound();
@@ -41,7 +42,13 @@ export default async function EditBudgetPage(props: PageProps<"/dashboard/[id]">
         publicUrl={publicUrl}
         onPublish={publishAction}
       />
-      <BudgetForm dict={dict} locale={locale} budget={budget} action={boundUpdate} />
+      <BudgetForm
+        dict={dict}
+        locale={locale}
+        budget={budget}
+        action={boundUpdate}
+        savedItems={savedItems}
+      />
     </div>
   );
 }
