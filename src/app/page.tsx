@@ -22,7 +22,6 @@ export default async function Home() {
       <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3 border-b sm:px-6 sm:py-4">
         <Logo size="sm" />
         <div className="flex items-center gap-3 sm:gap-4">
-          <LocaleSwitcher current={locale} />
           <LinkButton
             href={session ? "/dashboard" : "/login"}
             variant="ghost"
@@ -30,6 +29,7 @@ export default async function Home() {
           >
             {session ? dict.dashboard.title : dict.landing.ctaSecondary}
           </LinkButton>
+          <LocaleSwitcher current={locale} />
         </div>
       </header>
 
