@@ -1,12 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import type { Budget } from "@/lib/db/schema";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { deleteBudget } from "@/lib/actions/budgets";
 import { BudgetStatusBadge } from "@/components/budget-status-badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -15,6 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 export type BudgetRow = {
   id: string;
@@ -44,9 +56,22 @@ export function BudgetsTable({
   const [status, setStatus] = useState<Budget["status"] | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("updatedAt");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [pendingDelete, setPendingDelete] = useState<BudgetRow | null>(null);
+  const [isDeleting, startDelete] = useTransition();
 
   function kindLabel(kind: Budget["kind"]) {
     return kind === "product" ? dict.editor.kindProduct : dict.editor.kindService;
+  }
+
+  function confirmDelete() {
+    if (!pendingDelete) return;
+    const id = pendingDelete.id;
+    startDelete(async () => {
+      await deleteBudget(id);
+      setPendingDelete(null);
+      toast.success(dict.dashboard.deleted);
+      router.refresh();
+    });
   }
 
   const rows = useMemo(() => {
@@ -158,6 +183,9 @@ export function BudgetsTable({
                   {sortIcon("updatedAt")}
                 </span>
               </th>
+              <th className="px-3 py-2">
+                <span className="sr-only">{dict.dashboard.deleteAction}</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -183,11 +211,25 @@ export function BudgetsTable({
                 <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                   {formatDate(b.updatedAt, locale)}
                 </td>
+                <td className="whitespace-nowrap px-3 py-2 text-right">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={dict.dashboard.deleteAction}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPendingDelete(b);
+                    }}
+                  >
+                    <Trash2 className="text-muted-foreground" />
+                  </Button>
+                </td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">
                   {dict.dashboard.noResults}
                 </td>
               </tr>
@@ -195,6 +237,26 @@ export function BudgetsTable({
           </tbody>
         </table>
       </div>
+
+      <Dialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+      >
+        <DialogContent onClick={(e) => e.stopPropagation()}>
+          <DialogHeader>
+            <DialogTitle>{dict.dashboard.deleteConfirmTitle}</DialogTitle>
+            <DialogDescription>{dict.dashboard.deleteConfirmBody}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" />}>
+              {dict.dashboard.deleteConfirmCancel}
+            </DialogClose>
+            <Button variant="destructive" onClick={confirmDelete} disabled={isDeleting}>
+              {dict.dashboard.deleteAction}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -229,6 +229,20 @@ export async function updateBudget(id: string, formData: FormData) {
   revalidatePath(`/dashboard/${id}`);
 }
 
+/** Borra el presupuesto y sus adjuntos en Netlify Blobs (no se limpian solos,
+ * a diferencia de la fila en la base). La aceptación, si la hay, se borra
+ * en cascada por la FK. Irreversible — no hay confirmación server-side más
+ * allá de la de ownership; la confirmación de "¿estás seguro?" es responsabilidad
+ * de la UI que llama a esto. */
+export async function deleteBudget(id: string) {
+  const { budget } = await requireOwnedBudget(id);
+
+  await Promise.all(budget.attachments.map((a) => deleteAttachment(a.key).catch(() => {})));
+  await db.delete(budgets).where(eq(budgets.id, id));
+
+  revalidatePath("/dashboard");
+}
+
 export async function publishBudget(id: string) {
   const { budget, session } = await requireOwnedBudget(id);
   if (budget.status !== "draft") {

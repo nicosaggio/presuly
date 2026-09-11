@@ -91,6 +91,12 @@ export const es = {
     columnStatus: "Estado",
     columnUpdated: "Actualizado",
     noResults: "No hay presupuestos que coincidan con el filtro.",
+    deleteAction: "Eliminar",
+    deleteConfirmTitle: "¿Eliminar este presupuesto?",
+    deleteConfirmBody:
+      "Esta acción no se puede deshacer. Si ya lo enviaste, el link que tiene tu cliente deja de funcionar, y se borran los adjuntos.",
+    deleteConfirmCancel: "Cancelar",
+    deleted: "Presupuesto eliminado",
   },
   profile: {
     navLabel: "Perfil",

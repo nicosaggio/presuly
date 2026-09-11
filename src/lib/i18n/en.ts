@@ -92,6 +92,12 @@ export const en: Dictionary = {
     columnStatus: "Status",
     columnUpdated: "Updated",
     noResults: "No proposals match this filter.",
+    deleteAction: "Delete",
+    deleteConfirmTitle: "Delete this proposal?",
+    deleteConfirmBody:
+      "This can't be undone. If you already sent it, your client's link stops working, and its attachments are deleted.",
+    deleteConfirmCancel: "Cancel",
+    deleted: "Proposal deleted",
   },
   profile: {
     navLabel: "Profile",
