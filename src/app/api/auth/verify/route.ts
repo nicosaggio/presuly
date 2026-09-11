@@ -5,17 +5,23 @@ import { upsertUserByEmail, getUserByReferralCode } from "@/lib/db/queries";
 import { setLocale } from "@/lib/actions/auth";
 import { ATTRIBUTION_COOKIE, type AttributionPayload } from "@/lib/attribution";
 
+// En Netlify, `request.nextUrl.origin` resuelve al hostname interno del
+// deploy (`https://<deploy-id>--presuly.netlify.app`), no al dominio público
+// que usó el visitante — un redirect armado con eso manda la sesión a un
+// dominio distinto de donde quedó la cookie, y el login por magic link
+// termina rebotando a /login. `APP_URL` es la fuente de verdad correcta.
+const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
+
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
-  const origin = request.nextUrl.origin;
 
   if (!token) {
-    return NextResponse.redirect(`${origin}/login?error=invalid_link`);
+    return NextResponse.redirect(new URL("/login?error=invalid_link", APP_URL));
   }
 
   const payload = verifyMagicLinkToken(token);
   if (!payload) {
-    return NextResponse.redirect(`${origin}/login?error=invalid_link`);
+    return NextResponse.redirect(new URL("/login?error=invalid_link", APP_URL));
   }
 
   try {
@@ -39,14 +45,14 @@ export async function GET(request: NextRequest) {
     await setLocale(payload.locale);
   } catch (err) {
     console.error("magic link verification failed", err);
-    return NextResponse.redirect(`${origin}/login?error=invalid_link`);
+    return NextResponse.redirect(new URL("/login?error=invalid_link", APP_URL));
   }
 
   const destination =
     payload.next && payload.next.startsWith("/") && !payload.next.startsWith("//")
       ? payload.next
       : "/dashboard";
-  const response = NextResponse.redirect(`${origin}${destination}`);
+  const response = NextResponse.redirect(new URL(destination, APP_URL));
   response.cookies.delete(ATTRIBUTION_COOKIE);
   return response;
 }

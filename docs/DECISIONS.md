@@ -70,3 +70,13 @@ Arranque del trabajo de SEO off-page (lo técnico on-page ya estaba, ver entrada
 ## 2026-09-11 — Borrar presupuestos desde "Mis presupuestos"
 
 Faltaba: no había forma de eliminar un presupuesto ya creado, el usuario lo notó al revisar el dashboard. Se agregó `deleteBudget(id)` en `src/lib/actions/budgets.ts` (verifica ownership, borra los adjuntos en Netlify Blobs uno por uno, borra la fila — la aceptación, si la hay, se borra en cascada por la FK) y un ícono de basura por fila en `BudgetsTable`, con un diálogo de confirmación (irreversible, se avisa que el link del cliente deja de funcionar). Sin restricción por estado: se puede borrar un presupuesto en cualquier estado, incluido uno ya aceptado — es el dueño de la cuenta borrando su propio dato, no algo que decida la app por él.
+
+## 2026-09-11 — Bug crítico: el login por magic link rebotaba a /login en producción
+
+Una amiga del usuario probó registrarse, hizo clic en el link mágico de su email, y volvió a caer en la pantalla de "poné tu email" — el login nunca se completaba. Diagnosticado con un token armado a mano contra `https://presuly.com.ar/api/auth/verify`: el `Location` del redirect final apuntaba a `https://<deploy-id>--presuly.netlify.app/dashboard?token=...` — el hostname interno del deploy de Netlify, no `presuly.com.ar`, y encima con el token colgando como query string. Como es otro dominio, la cookie de sesión (que sí había quedado bien puesta en `presuly.com.ar`) no viajaba ahí, y el dashboard redirigía a `/login` sin sesión.
+
+Causa: `src/app/api/auth/verify/route.ts` armaba el redirect con `request.nextUrl.origin`, que en el entorno serverless de Netlify resuelve al hostname interno del deploy, no al dominio público que usó el visitante. **Ningún otro archivo del repo usaba ese patrón** (se confirmó por grep) — no es un problema generalizado, estaba aislado a este endpoint.
+
+Este bug estuvo presente probablemente desde que se armó el login (Fase 1) y nunca se detectó antes porque ninguna sesión de trabajo probó el flujo completo con un click real desde un email real — todo el testeo de este proyecto usó cookies de sesión firmadas a mano o sesiones ya existentes, nunca el circuito completo "pedir link → recibirlo → clickearlo". **Lección para el RUNBOOK**: antes de dar por buena una feature de auth, probarla con un flujo real de punta a punta al menos una vez, no solo con atajos de testing.
+
+Arreglado usando `APP_URL` (la env var ya pensada para esto, ver `.env.local`) como fuente de verdad del dominio en los tres redirects de ese archivo, con `new URL(path, APP_URL)` en vez de interpolar un string — así tampoco puede colarse un query string residual. Verificado con un token real contra producción antes y después del fix.
