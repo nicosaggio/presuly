@@ -35,6 +35,9 @@ export const metadata: Metadata = {
     "software de presupuestos",
   ],
   alternates: { canonical: "/" },
+  verification: {
+    google: "oqrj3Pr_u5PedpvvUBjYT14L9qnvCoqu22yBy8ejgGY",
+  },
   icons: {
     icon: [{ url: "/presuly-favicon.svg", type: "image/svg+xml" }],
     apple: "/apple-touch-icon-180.png",
