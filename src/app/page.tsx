@@ -90,6 +90,9 @@ export default async function Home() {
         <Link href="/templates" className="hover:text-foreground">
           {dict.common.templates}
         </Link>
+        <Link href="/blog" className="hover:text-foreground">
+          Blog
+        </Link>
         <Link href="/terms" className="hover:text-foreground">
           {dict.common.terms}
         </Link>
