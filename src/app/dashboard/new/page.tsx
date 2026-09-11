@@ -39,7 +39,7 @@ export default async function NewBudgetPage(props: PageProps<"/dashboard/new">) 
     : undefined;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-semibold">{dict.editor.newTitle}</h1>
       {limitReached ? (
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm space-y-2">

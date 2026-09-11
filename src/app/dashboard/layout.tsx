@@ -34,7 +34,7 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
         : dict.dashboard.planBadgeStudio;
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex min-w-0 flex-1 flex-col">
       <header className="border-b">
         <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
           <Link href="/dashboard" aria-label={dict.common.appName} className="shrink-0">
@@ -68,7 +68,7 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
           )}
         </nav>
       </header>
-      <main className="flex-1 px-6 py-8 w-full max-w-3xl mx-auto">{children}</main>
+      <main className="w-full min-w-0 max-w-6xl flex-1 mx-auto px-6 py-8">{children}</main>
     </div>
   );
 }

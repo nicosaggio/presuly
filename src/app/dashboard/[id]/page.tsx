@@ -33,7 +33,7 @@ export default async function EditBudgetPage(props: PageProps<"/dashboard/[id]">
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-semibold">{dict.editor.editTitle}</h1>
       <BudgetPublishPanel
         budget={budget}
