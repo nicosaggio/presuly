@@ -52,7 +52,13 @@ export async function GET(request: NextRequest) {
     payload.next && payload.next.startsWith("/") && !payload.next.startsWith("//")
       ? payload.next
       : "/dashboard";
-  const response = NextResponse.redirect(new URL(destination, APP_URL));
+  const destinationUrl = new URL(destination, APP_URL);
+  // Netlify le pega el query string del request original a cualquier redirect
+  // 307 cuyo destino no tenga uno propio (confirmado a mano contra prod,
+  // 2026-09-11) — sin esto, el token del magic link terminaba colgando en la
+  // URL final. Con un query propio, Netlify no lo toca.
+  if (!destinationUrl.search) destinationUrl.search = "login=ok";
+  const response = NextResponse.redirect(destinationUrl);
   response.cookies.delete(ATTRIBUTION_COOKIE);
   return response;
 }
