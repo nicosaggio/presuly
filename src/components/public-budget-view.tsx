@@ -247,9 +247,9 @@ export function PublicBudgetView({
         <footer className="pt-6 flex justify-center">
           <Link
             href="/?utm_source=budget_footer"
-            className="inline-flex items-center gap-1.5 text-xs text-[var(--presuly-texto-3)] hover:text-foreground"
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--presuly-verde)]/25 bg-[var(--presuly-verde-claro)] px-4 py-2 text-sm font-medium text-[var(--presuly-verde)] transition-colors hover:bg-[var(--presuly-verde)]/15"
           >
-            <LogoMark size={16} />
+            <LogoMark size={18} />
             {dict.publicView.poweredBy}
           </Link>
         </footer>
