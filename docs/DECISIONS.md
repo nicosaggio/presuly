@@ -80,3 +80,19 @@ Causa: `src/app/api/auth/verify/route.ts` armaba el redirect con `request.nextUr
 Este bug estuvo presente probablemente desde que se armó el login (Fase 1) y nunca se detectó antes porque ninguna sesión de trabajo probó el flujo completo con un click real desde un email real — todo el testeo de este proyecto usó cookies de sesión firmadas a mano o sesiones ya existentes, nunca el circuito completo "pedir link → recibirlo → clickearlo". **Lección para el RUNBOOK**: antes de dar por buena una feature de auth, probarla con un flujo real de punta a punta al menos una vez, no solo con atajos de testing.
 
 Arreglado usando `APP_URL` (la env var ya pensada para esto, ver `.env.local`) como fuente de verdad del dominio en los tres redirects de ese archivo, con `new URL(path, APP_URL)` en vez de interpolar un string — así tampoco puede colarse un query string residual. Verificado con un token real contra producción antes y después del fix.
+
+## 2026-09-14 — Se saca el login por magic link, se reemplaza por Google
+
+Motivado directamente por el bug de arriba (el link mágico "es engorroso" y encima se rompió una vez en producción): el usuario pidió sacar el magic link y agregar login social. Se evaluó Google + Apple; **Apple queda afuera por ahora** — "Sign in with Apple" exige una cuenta de Apple Developer Program (USD 99/año) que el usuario no tiene y que yo no puedo pagar ni crear por él. Decisión: arrancar solo con Google, agregar Apple más adelante si hace falta.
+
+**Implementación sin librería de auth** (no Auth.js/NextAuth): se armó un flujo OAuth mínimo a mano (`src/lib/auth/google.ts` + `src/app/api/auth/google/route.ts` + `.../callback/route.ts`), reusando la sesión que ya existía (cookie HMAC firmada, `src/lib/auth/session.ts`, sin tocar) y el mismo `upsertUserByEmail` de siempre. Se prefirió esto a sumar una dependencia grande porque el proyecto ya tenía su propio mecanismo de sesión funcionando bien, y una librería de auth completa hubiera traído su propio modelo de sesión/adapter a reconciliar con el existente — más superficie para mantener sin necesidad real.
+
+Detalles de la implementación:
+- Identidad de usuario por email (`email_verified` de Google), igual que antes — un usuario que ya existía por magic link se reconoce solo al loguearse con Google usando el mismo email, sin migración de datos.
+- CSRF del flujo OAuth: un `state` random guardado en una cookie httpOnly de 10 minutos (`presuly_oauth_state`), comparado contra el `state` que Google devuelve — no hace falta JWT ni librería extra para esto.
+- El `next` (a dónde volver después de loguearse, ej. `/pricing`) viaja adentro de esa misma cookie, no en la URL — mismo patrón que ya usaba el magic link.
+- Aplicadas de entrada las dos lecciones del bug de arriba: `APP_URL` en vez de `request.nextUrl.origin`, y un query propio (`?login=ok`) en el redirect final de éxito para que Netlify no le pegue el `code`/`state` del callback de Google.
+
+**Se borró completo**: `src/lib/auth/magic-link.ts`, `src/lib/auth/rate-limit.ts`, `src/app/api/auth/verify/route.ts`, la tabla `magic_link_requests` (migración `drizzle/0009_funny_franklin_storm.sql`, `DROP TABLE ... CASCADE`), el template de email `magicLinkEmail`, y todas las claves de diccionario específicas del flujo anterior (quedó `auth.unknownError`, que también usa la aceptación pública de presupuestos).
+
+**Pendiente del lado del usuario**: crear el OAuth client ID en Google Cloud Console (ver `docs/RUNBOOK.md` → Setup local) y pasar `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` para poder probar y deployar esto — sin esas credenciales el botón de login no funciona todavía.

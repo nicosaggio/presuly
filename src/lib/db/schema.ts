@@ -148,16 +148,6 @@ export const systemState = pgTable("system_state", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/** Un registro por cada pedido de magic link, para rate limiting server-side
- * (por email y por IP) además del cooldown de 30s por cookie. Se poda solo,
- * igual que email_sends. Ver src/lib/auth/rate-limit.ts. */
-export const magicLinkRequests = pgTable("magic_link_requests", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  email: text("email").notNull(),
-  ip: text("ip"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
 /** Biblioteca de ítems reutilizables por cuenta: al guardar/publicar un
  * presupuesto, cada ítem se sube (por descripción) con su precio y moneda
  * más recientes. No se acumulan duplicados de la misma descripción — el

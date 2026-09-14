@@ -17,14 +17,6 @@ function layout(locale: Locale, bodyHtml: string, ctaUrl?: string, ctaLabel?: st
   </div>`;
 }
 
-export function magicLinkEmail(locale: Locale, url: string) {
-  const d = dictionaries[locale].emails;
-  return {
-    subject: d.magicLinkSubject,
-    html: layout(locale, `<p>${d.magicLinkBody}</p>`, url, d.magicLinkCta),
-  };
-}
-
 export function budgetViewedEmail(
   locale: Locale,
   vars: { clientName: string; title: string; dashboardUrl: string }

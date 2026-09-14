@@ -19,7 +19,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
 
   const dict = await getDictionary();
   const searchParams = await props.searchParams;
-  const hasLinkError = searchParams?.error === "invalid_link";
+  const hasOAuthError = searchParams?.error === "oauth_failed";
   const next = typeof searchParams?.next === "string" ? searchParams.next : undefined;
 
   return (
@@ -31,8 +31,8 @@ export default async function LoginPage(props: PageProps<"/login">) {
           <CardDescription>{dict.auth.loginSubtitle}</CardDescription>
         </CardHeader>
         <CardContent>
-          {hasLinkError && (
-            <p className="mb-4 text-sm text-destructive">{dict.auth.invalidLink}</p>
+          {hasOAuthError && (
+            <p className="mb-4 text-sm text-destructive">{dict.auth.oauthError}</p>
           )}
           <LoginForm dict={dict} next={next} />
         </CardContent>
